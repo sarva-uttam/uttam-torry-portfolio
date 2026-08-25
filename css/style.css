@@ -413,6 +413,12 @@ body::after {
   color: var(--color-text-muted);
 }
 
+.about__resume {
+  position: relative;
+  z-index: 1;
+  margin-top: 2rem;
+}
+
 /* ---------- Skills ---------- */
 
 .skills {
