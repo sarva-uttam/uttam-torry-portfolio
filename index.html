@@ -13,6 +13,36 @@
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <header class="navbar">
+    <div class="container navbar__inner">
+      <a href="#" class="navbar__brand">
+        <span class="navbar__avatar" aria-hidden="true">UT</span>
+        <span class="navbar__name">Uttam Torry</span>
+      </a>
+
+      <button
+        type="button"
+        class="navbar__toggle"
+        id="navToggle"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        aria-controls="navLinks"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <nav class="navbar__nav" id="navLinks">
+        <a href="#" class="navbar__link">Home</a>
+        <a href="#about" class="navbar__link">About</a>
+        <a href="#skills" class="navbar__link">Skills</a>
+        <a href="#projects" class="navbar__link">Projects</a>
+        <a href="#contact" class="navbar__link">Contact</a>
+      </nav>
+    </div>
+  </header>
+
   <section class="hero">
     <canvas id="particles"></canvas>
     <div class="hero__glow"></div>
@@ -75,6 +105,91 @@
       </div>
     </div>
   </section>
+
+  <section class="projects" id="projects">
+    <div class="container">
+      <p class="section__eyebrow">Projects</p>
+      <h2 class="section__heading">Featured Work</h2>
+
+      <div class="projects__grid">
+        <article class="project-card">
+          <h3 class="project-card__title">Digital Invite Website</h3>
+          <p class="project-card__desc">
+            An AI-assisted platform for creating and sharing digital wedding
+            and event invitations, with a creator dashboard, RSVP tracking,
+            and customizable templates.
+          </p>
+          <div class="project-card__tags">
+            <span class="project-tag">Next.js</span>
+            <span class="project-tag">TypeScript</span>
+            <span class="project-tag">Supabase</span>
+            <span class="project-tag">Tailwind CSS</span>
+          </div>
+          <a href="#" class="btn btn--secondary btn--sm">View Project</a>
+        </article>
+
+        <article class="project-card">
+          <h3 class="project-card__title">TaskFlow</h3>
+          <p class="project-card__desc">
+            A collaborative task and project management app with real-time
+            boards, activity tracking, and team workspaces.
+          </p>
+          <div class="project-card__tags">
+            <span class="project-tag">React</span>
+            <span class="project-tag">Node.js</span>
+            <span class="project-tag">MongoDB</span>
+          </div>
+          <a href="#" class="btn btn--secondary btn--sm">View Project</a>
+        </article>
+
+        <article class="project-card">
+          <h3 class="project-card__title">Marketplace</h3>
+          <p class="project-card__desc">
+            A full-featured e-commerce storefront with product search,
+            secure checkout, and an admin panel for inventory management.
+          </p>
+          <div class="project-card__tags">
+            <span class="project-tag">Next.js</span>
+            <span class="project-tag">Stripe</span>
+            <span class="project-tag">PostgreSQL</span>
+          </div>
+          <a href="#" class="btn btn--secondary btn--sm">View Project</a>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="container">
+      <p class="section__eyebrow">Contact</p>
+      <h2 class="section__heading">Let's Build Something</h2>
+
+      <form class="contact__form">
+        <div class="form-field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" placeholder="Your name" required />
+        </div>
+
+        <div class="form-field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" required />
+        </div>
+
+        <div class="form-field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" placeholder="Tell me about your project..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn--primary">Send Message</button>
+      </form>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <p class="footer__copy">&copy; 2026 Uttam Torry. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script src="js/script.js" defer></script>
 </body>

@@ -7,7 +7,7 @@
   ).matches;
 
   var particles = [];
-  var particleColor = "79, 216, 255";
+  var particleColor = "93, 255, 168";
   var linkDistance = 130;
   var width, height, dpr;
 
@@ -104,4 +104,29 @@
   } else {
     requestAnimationFrame(step);
   }
+})();
+
+(function () {
+  var toggle = document.getElementById("navToggle");
+  var nav = document.getElementById("navLinks");
+
+  if (!toggle || !nav) return;
+
+  function closeNav() {
+    nav.classList.remove("is-open");
+    toggle.setAttribute("aria-expanded", "false");
+  }
+
+  toggle.addEventListener("click", function () {
+    var isOpen = nav.classList.toggle("is-open");
+    toggle.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  });
+
+  nav.querySelectorAll(".navbar__link").forEach(function (link) {
+    link.addEventListener("click", closeNav);
+  });
+
+  window.addEventListener("resize", function () {
+    if (window.innerWidth > 768) closeNav();
+  });
 })();
