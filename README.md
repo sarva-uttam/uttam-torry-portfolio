@@ -4,7 +4,7 @@ Evidence-led portfolio for Uttam Torry, a Graduate Software Developer based in M
 
 ## Live portfolio
 
-Deployment is pending. Once published, add the production URL here and to the repository homepage field.
+[View the live portfolio](https://monsieur-zordi.github.io/uttam-torry-portfolio/)
 
 ## What this portfolio demonstrates
 
