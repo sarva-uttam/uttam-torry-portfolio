@@ -1,72 +1,63 @@
-# Uttam Torry - Professional Portfolio
+# Uttam Torry — Developer Portfolio
 
-Evidence-led portfolio for Uttam Torry, a Graduate Software Developer based in Mauritius and open to relocation and international opportunities.
+A responsive, evidence-led portfolio for **Uttam Torry**, a Graduate Software Developer based in Mauritius and open to relocation and international opportunities.
 
-## Live portfolio
+## Portfolio focus
 
-[View the live portfolio](https://monsieur-zordi.github.io/uttam-torry-portfolio/)
+The site is designed for recruiters and engineering teams who want to understand, quickly and honestly:
 
-## What this portfolio demonstrates
+- what I build;
+- how I approach engineering problems;
+- which projects demonstrate my skills; and
+- how to contact me.
 
-- Responsive, accessible front-end implementation
-- Clear presentation of real project work and current project status
-- JavaScript and TypeScript development interests
-- Testing, requirements analysis and technical documentation
-- Honest graduate-level positioning without unsupported claims
-
-## Selected projects
+## Featured work
 
 ### ISeeCode Visual Interpreter
 
-A browser-based learning tool that explains code while users type, including incomplete and non-runnable input.
+A browser-based learning system that explains code line by line, including incomplete and non-runnable input.
 
-- [Live demo](https://sarvauttam.github.io/visual-interpreter)
-- [Repository](https://github.com/sarvauttam/visual-interpreter)
+- [Live demo](https://sarva-uttam.github.io/visual-interpreter/)
+- [Repository](https://github.com/sarva-uttam/visual-interpreter)
 
-### AI Digital Invitation Platform
+### Digital E-invite
 
-A private project currently in development. The verified work includes a Next.js and TypeScript engineering baseline, CI quality gates, environment validation, testing, migration tooling and detailed product and security specifications. No public release is claimed.
+A private wedding-first digital invitation platform in active development. Verified work includes a strict Next.js and TypeScript baseline, database migrations, testing, CI quality gates and carefully documented product decisions. No public release is claimed.
 
 ### Zordi Budget Tracker
 
-A private, specification-led civic-technology project for tracking Mauritius budget measures using evidence records, lifecycle states, corrections and audit history. Application implementation is not claimed.
+A private, non-partisan civic-technology platform in active development. Its evidence model, lifecycle history and implementation foundation are designed to make Mauritius budget commitments publicly verifiable. No public launch is claimed.
 
-## Technology
+## Built with
 
 - Semantic HTML5
 - Modern responsive CSS
 - Vanilla JavaScript
-- Accessible navigation and reduced dependency footprint
+- Accessible navigation and reduced-motion support
+- No framework or build step
 
 ## Run locally
-
-No build step is required.
 
 ```bash
 npx serve .
 ```
 
-Then open the local URL printed in the terminal.
+Open the local URL shown in the terminal.
 
-## Project structure
+## Structure
 
 ```text
 .
-|-- index.html
-|-- css/
-|   `-- style.css
-|-- js/
-|   `-- script.js
-`-- assets/
-    `-- Uttam-Torry-Resume.pdf
+├── index.html
+├── css/style.css
+├── js/script.js
+└── assets/Uttam-Torry-Resume.pdf
 ```
 
 ## Contact
 
-- GitHub: [monsieur-zordi](https://github.com/monsieur-zordi)
-- LinkedIn: [Uttam Torry](https://www.linkedin.com/in/uttam-torry-490702361/)
-- Email: [uttamtorry@gmail.com](mailto:uttamtorry@gmail.com)
+- [GitHub](https://github.com/sarva-uttam)
+- [LinkedIn](https://www.linkedin.com/in/uttam-torry-490702361/)
+- [Email](mailto:uttamtorry@gmail.com)
 
-## Status
-
-The portfolio is actively maintained. Project descriptions are updated as verifiable implementation milestones and public demonstrations become available.
+Project descriptions are updated as verifiable implementation milestones and public demonstrations become available.
