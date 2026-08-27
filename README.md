@@ -37,7 +37,6 @@ The central challenge was that beginner code is often incomplete, incorrect, or 
 
 This project developed my understanding of language processing, execution state, educational UX, and the importance of explaining system limitations honestly.
 
-- [Open the live project](https://sarva-uttam.github.io/visual-interpreter/)
 - [Explore the repository](https://github.com/sarva-uttam/visual-interpreter)
 
 ### Enveloped — Digital Invite
