@@ -26,7 +26,7 @@ My experience outside engineering—including hospitality, tutoring, and deliver
 
 ## What I am building
 
-### ISeeCode Visual Interpreter
+### ISeeCode — Visual Interpreter
 
 My flagship academic project is a browser-based learning system that helps students understand what code is doing line by line.
 
@@ -40,25 +40,33 @@ This project developed my understanding of language processing, execution state,
 - [Open the live project](https://sarva-uttam.github.io/visual-interpreter/)
 - [Explore the repository](https://github.com/sarva-uttam/visual-interpreter)
 
-### Digital E-invite
+### Enveloped — Digital Invite
 
-A private, wedding-first digital invitation platform in active development. The product is intended to help hosts create, publish, share, and manage mobile-first wedding invitations and RSVPs.
+A private digital-invitation platform in active development. It helps people create, personalise and share modern invitations for weddings and other celebrations.
 
-My verified work includes the Next.js and TypeScript engineering baseline, PostgreSQL and Drizzle migration tooling, automated tests, CI quality gates, audit and outbox foundations, concurrency-safe entitlement logic, and detailed product and security decisions.
+Verified work includes a guided survey, generated-invitation viewer, template gallery, device-scoped dashboard, Supabase persistence, RSVP handling and AI-assisted copy with a deterministic fallback.
 
-The project is teaching me how to move beyond a prototype and build around data integrity, operational safety, product constraints, and maintainable implementation.
+**Technology:** Next.js, TypeScript, Tailwind CSS, Supabase and the Vercel AI SDK.
 
 **Status:** Active private development. No public release is claimed.
 
 ### Zordi Budget Tracker
 
-A private, non-partisan civic-technology platform in active development. It is designed to track how Mauritius public-budget measures move from announcement to evidence-backed delivery.
+A private, non-partisan and specification-led civic-technology project. It is designed to track how Mauritius public-budget measures move from announcement to evidence-backed delivery.
 
 The work separates claims, sources, evidence, and assessments. It also models financial stages, lifecycle history, corrections, uncertainty, and auditability so that public information can be inspected rather than merely trusted.
 
 This project reflects my interest in software that makes complex public information clearer and more accountable.
 
-**Status:** Active private development. No public launch is claimed.
+**Status:** Private specification and product-design work. No completed application or public launch is claimed.
+
+### Bwoo & Bloo's Books
+
+A private digital-product series of fillable PDF trackers, planners and journals designed to make practical everyday activities easier to organise.
+
+The work uses a shared visual system, reusable HTML/CSS layouts and a repeatable Playwright-to-PDF production workflow. Research notes and visual-quality checks are documented for each title.
+
+**Status:** Digital products in development. No public website or repository link is claimed.
 
 ## How I approach engineering
 
@@ -85,6 +93,8 @@ That means I try to:
 | Quality | Vitest, Playwright, debugging, CI quality gates |
 | Workflow | Git, GitHub, Docker fundamentals, technical documentation |
 
+**Spoken languages:** English, French, Hindi and Russian.
+
 I list technologies I can reasonably discuss and continue updating this section as my practical experience grows.
 
 ## About this portfolio
@@ -92,10 +102,9 @@ I list technologies I can reasonably discuss and continue updating this section 
 The portfolio itself is intentionally lightweight. It demonstrates that a professional experience does not always require a large framework or dependency tree.
 
 - Semantic HTML5
-- Responsive CSS with a custom editorial/engineering visual system
+- Responsive CSS with a focused dark-green visual system
 - Vanilla JavaScript
 - Keyboard-friendly navigation
-- Reduced-motion support
 - Progressive enhancement
 - Automated GitHub Pages deployment
 
@@ -118,7 +127,7 @@ Then open the local address shown in the terminal.
 ├── .github/workflows/       # GitHub Pages deployment
 ├── assets/                  # Public résumé
 ├── css/style.css            # Responsive visual system
-├── js/script.js             # Navigation and reveal behaviour
+├── js/script.js             # Navigation and current-year behaviour
 ├── index.html               # Portfolio content and structure
 └── README.md                # Repository story and documentation
 ```
@@ -127,7 +136,7 @@ Then open the local address shown in the terminal.
 
 I am currently focused on:
 
-- developing Digital E-invite and Zordi Budget Tracker;
+- developing Enveloped, Zordi Budget Tracker and Bwoo & Bloo's Books;
 - strengthening full-stack engineering and software-architecture skills;
 - improving public documentation and demonstrations; and
 - preparing for graduate and junior engineering opportunities worldwide.
