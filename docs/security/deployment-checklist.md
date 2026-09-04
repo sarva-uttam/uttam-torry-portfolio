@@ -9,7 +9,7 @@ quarter as a spot check. It's short on purpose.
 - [ ] `git diff --staged` reviewed line by line — no secret, no personal data beyond what's already approved, no debug code.
 - [ ] No new `innerHTML` / `outerHTML` / `insertAdjacentHTML` / `document.write` / `eval` / `new Function` in JS.
 - [ ] No new inline `<script>` (put JS in a `.js` file so `script-src 'self'` keeps working). No inline `on*=` handlers.
-- [ ] Any new external resource (script, style, font, image, connect) is added to the `<meta>` CSP on **all three** HTML files **and** to the recommended header CSP in `control-matrix.md`.
+- [ ] Any new external resource (script, style, font, image, connect) is added to the `<meta>` CSP on **all three** HTML files **and** to the CSP line in `/_headers`. Keep the two in sync (the only intended difference is `frame-ancestors 'none'`, which only the header can express).
 - [ ] Any new `target="_blank"` link has `rel="noopener noreferrer"`.
 - [ ] New GitHub Actions are pinned to a full commit SHA with a `# vX.Y.Z` comment; workflow permissions stay minimal.
 
@@ -28,9 +28,10 @@ python -m http.server 8000
 
 ## Verify on the live site (after deploy)
 
-- [ ] `curl -sI https://sarva-uttam.github.io/uttam-torry-portfolio/` shows `Strict-Transport-Security` and HTTPS.
+- [ ] `curl -sI <live-url>` shows HTTPS + `Strict-Transport-Security`.
 - [ ] View source: CSP `<meta>` and `referrer` `<meta>` present on all three pages.
-- [ ] The Actions run that deployed it was triggered by your push, from `master`, and succeeded.
+- [ ] **GitHub Pages:** the Actions run that deployed was triggered by your push from `master` and succeeded.
+- [ ] **Tiiny Host / Netlify / Cloudflare Pages:** `curl -sI <live-url>` also shows `content-security-policy`, `x-content-type-options`, `x-frame-options`, `permissions-policy` (from `/_headers`). If they are absent, the plan does not honour `_headers` — the `<meta>` CSP is still active.
 - [ ] Optional: paste the CSP into <https://csp-evaluator.withgoogle.com/> and confirm no regression.
 
 ## Quarterly
