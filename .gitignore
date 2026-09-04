@@ -6,11 +6,8 @@ Video frames/
 .playwright-mcp/
 .vscode/
 
-# verification screenshots
-/faq-desktop.png
-/faq-tablet.png
-/faq-open.png
-/faq-mobile-nav.png
+# verification screenshots (root-level only; assets/ pngs are kept)
+/*.png
 /*.local.*
 
 # OS junk
