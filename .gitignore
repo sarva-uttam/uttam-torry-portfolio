@@ -28,3 +28,7 @@ secrets.*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# never commit a copy of the repo itself
+.git.zip
+*.bundle
