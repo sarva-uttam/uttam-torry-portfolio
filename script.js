@@ -406,7 +406,9 @@
   function initViewSwitch() {
     document.querySelectorAll("[data-view]").forEach(function (a) {
       a.addEventListener("click", function () {
-        try { localStorage.setItem("siteView", a.getAttribute("data-view")); } catch (e) {}
+        var v = a.getAttribute("data-view");
+        if (v !== "mobile" && v !== "desktop") return;   // only ever store a known value
+        try { localStorage.setItem("siteView", v); } catch (e) {}
       });
     });
   }

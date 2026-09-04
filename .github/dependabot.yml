@@ -1,0 +1,15 @@
+version: 2
+updates:
+  # The site has no application package manager. The only moving dependency
+  # is the set of GitHub Actions in the deploy workflow — keep those current
+  # and let the owner review each bump (they are pinned to commit SHAs).
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"
+    groups:
+      actions:
+        patterns: ["*"]
