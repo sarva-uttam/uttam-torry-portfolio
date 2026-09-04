@@ -1,0 +1,23 @@
+# Response headers for hosts that honour a Netlify-style _headers file
+# (Tiiny Host paid plans, Netlify, Cloudflare Pages, etc.).
+#
+# GitHub Pages ignores this file — there the <meta> CSP + <meta> referrer in
+# each HTML page are the baseline, and these headers are "recommended, needs a
+# header-capable host" (see docs/security/control-matrix.md).
+#
+# Keep the Content-Security-Policy here in sync with the <meta http-equiv=
+# "Content-Security-Policy"> tag in index.html / faq.html / m.html. The only
+# intended difference is `frame-ancestors 'none'`, which a <meta> CSP cannot express.
+
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; manifest-src 'self'; upgrade-insecure-requests
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: accelerometer=(), autoplay=(), camera=(), display-capture=(), encrypted-media=(), fullscreen=(self), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), midi=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+
+/assets/*
+  Cache-Control: public, max-age=604800, immutable
