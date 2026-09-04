@@ -1,138 +1,98 @@
-# Uttam Torry — Portfolio
+<div align="center">
 
-A portfolio built around a scroll-scrubbed cinematic hero that plays the
-**full video (frames 1 → 300)**. Overlay panels cross-fade over the portrait as
-you scroll; the contact footer follows the last frame. A second page,
-`faq.html`, shares the nav, footer and assets.
+# Uttam Torry — Software Developer Portfolio
 
-## Run
+### Careful engineering. Thoughtful digital products. Room to grow.
 
-Needs a local server (the frames load via `Image`, so `file://` won't work):
+A cinematic, interactive portfolio presenting my work, technical capabilities and journey as a graduate software developer based in Mauritius.
+
+[View the live portfolio](https://sarva-uttam.github.io/Portfolio.ut/) · [Download my CV](assets/Uttam-Torry-CV-2026.pdf) · [Connect on LinkedIn](https://www.linkedin.com/in/uttam-torry-490702361/)
+
+</div>
+
+---
+
+## About the portfolio
+
+This portfolio is more than a collection of links. It is a deliberately crafted web experience designed to show how I approach software: with attention to detail, clarity and a strong connection between engineering and presentation.
+
+The desktop experience turns scrolling into a visual narrative. A 300-frame cinematic sequence moves through my introduction, selected projects, background and capabilities, while a dedicated mobile version presents the same content in a fast, natural vertical layout.
+
+## Featured work
+
+The portfolio introduces four projects that reflect different sides of my interests:
+
+- **ISeeCode** — a visual code interpreter that explains program execution step by step.
+- **Enveloped** — a full-stack platform for creating personalised digital invitations.
+- **Zordi Budget Tracker** — a civic-technology product for tracking public commitments through evidence and verified outcomes.
+- **Bwoo & Bloo’s Books** — a structured creative-publishing system for consistent educational book production.
+
+## Experience highlights
+
+- Scroll-controlled animation mapped across 300 image frames
+- Smooth canvas rendering with preloading and frame interpolation
+- Reversible, position-based panel transitions
+- Separate desktop and mobile experiences with remembered view preferences
+- Responsive navigation and accessible interactive elements
+- Downloadable CV, social links and a contact chooser
+- Dedicated FAQ page with keyboard-friendly accordions
+- Automatic deployment through GitHub Pages
+
+## How I executed the website
+
+I began by defining the portfolio as a guided story rather than a conventional page. The desktop composition was built on a fixed 1280 × 720 stage so the portrait, typography and interface elements remain aligned at different viewport sizes and zoom levels.
+
+I then mapped scroll progress to the image sequence and used JavaScript to preload, render and smoothly transition between frames on a canvas. Each content panel is driven by the same scroll position, making every entrance and exit predictable and reversible. For phones, I created a dedicated lightweight layout that prioritises readability and natural scrolling.
+
+The result is a static website with no build step or backend: focused, portable and easy to deploy.
+
+## Built with
+
+- Semantic HTML5
+- Modern CSS
+- Vanilla JavaScript
+- Canvas API
+- Intersection Observer API
+- Native `<dialog>` and `<details>` elements
+- GitHub Actions and GitHub Pages
+
+## Project structure
+
+```text
+Portfolio.ut/
+├── index.html                 # Cinematic desktop experience
+├── m.html                     # Dedicated mobile experience
+├── faq.html                   # Frequently asked questions
+├── styles.css                 # Visual system and responsive styling
+├── script.js                  # Animation, navigation and interactions
+├── assets/
+│   ├── frames/                # 300-frame hero sequence
+│   └── Uttam-Torry-CV-2026.pdf
+└── .github/workflows/
+    └── deploy-pages.yml       # GitHub Pages deployment
+```
+
+## Run locally
+
+The frame sequence must be served over HTTP rather than opened directly from the file system.
 
 ```bash
+git clone https://github.com/sarva-uttam/Portfolio.ut.git
+cd Portfolio.ut
 python -m http.server 8000
-# then open http://localhost:8000
 ```
 
-## Structure
+Open [http://localhost:8000](http://localhost:8000) in your browser.
 
-| File | Purpose |
-|------|---------|
-| `index.html` | Loader, shared nav, pinned hero with 4 overlay panels, shared footer, connect dialog |
-| `faq.html` | Standalone FAQ page — shares the nav, footer, `styles.css` and `script.js` |
-| `styles.css` | All styling + responsive rules (`.faq-*` block for the FAQ page) |
-| `script.js`  | Frame preloader, canvas renderer, stage scaling, scroll → frame mapping, `panelAnim` assemble/disassemble, `updateRing`, reveal-on-scroll, `initNav` (mobile drawer), `initFaq` (accordion), `initViewSwitch`. Hero/canvas work is guarded by `HAS_HERO`, so `faq.html` and `m.html` load the same file safely |
-| `m.html` | Dedicated mobile build — a normal vertically-scrolling page (no frame scrubbing) |
-| `assets/frames/` | 300 JPG frames (`ezgif-frame-001.jpg` … `ezgif-frame-300.jpg`) |
-| `assets/Uttam-Torry-CV-2026.pdf` | CV linked from the nav (all pages) and hero |
+## Deployment
 
-## The locked stage (why nothing drifts on zoom)
+Every push to the `master` branch triggers the GitHub Actions workflow, packages the static files and publishes the latest version to GitHub Pages.
 
-The whole scene is composed on a **fixed `1280 × 720` stage** (`.hero__stage`,
-matching the frame aspect). `script.js` sets `--hsc = min(vw/1280, vh/720)` and
-the stage is `transform: scale(--hsc)` — one transform for the portrait *and*
-every overlay, so they can never move relative to each other. `container-type:
-size` on the stage pins the `cqw` / `cqh` units the panels use to `12.8px` /
-`7.2px`, so a browser zoom (which only changes the CSS-pixel viewport) rescales
-the poster as a whole instead of reflowing it. Off-ratio windows get thin
-theme-coloured letterbox strips.
+---
 
-## How the scroll works
+<div align="center">
 
-`.hero` is `900vh` tall; `.hero__sticky` pins for that whole distance. Scroll
-progress `0 → 1` maps to frame **`1 → 300`**, drawn straight to the `1280 × 720`
-`<canvas>`, smoothed with a `requestAnimationFrame` lerp.
+Built with care by **Uttam Torry**  
+Open to graduate and junior software-development opportunities.
 
-Four overlay panels **assemble / disassemble** as you scroll (`panelAnim()`):
-each `[data-anim]` element flies in from its side of the stage, staggered, holds,
-then flies back out in reverse — all a pure function of scroll position, so it is
-fully reversible when scrolling back up (no pop-in / pop-out).
-
-| Frames    | Panel |
-|-----------|-------|
-| 1 – ~34   | **Hero** — headline, availability pill, right-hand fact rail. Seated at rest; disassembles upward as you scroll in |
-| ~58 – 150 | **Selected work** — 4 project cards flanking the character |
-| ~140 – 236| **About** — bio column left, oversized `CAREFUL ENGINEERING, / ROOM TO` *and* `GROW.` type right, spoken languages |
-| ~228 – 300| **Core capabilities** — 8 neon-white cards fly out from the centre onto a big circle (`updateRing()`), revolve ~250°, then **freeze and hold**. Cards ride the left/right arcs; the top/bottom run off-stage so the face stays clear |
-| after     | pin releases → the **footer** scrolls up over the last frame |
-
-Panel timing lives at the top of `script.js` (`HERO_OUT`, `WORK_IN/OUT`,
-`ABOUT_IN/OUT`, `RING_IN`, `RING_REV`, `RING_ROT`); ring geometry is `RING_R` /
-`RING_CARD` plus the `.rp__ring` centre in `styles.css`.
-
-## Mobile build (`m.html`) + device routing
-
-A small blocking script in the `<head>` of `index.html` and `m.html` checks
-`pointer: coarse` / `hover: none` + screen size + user-agent. Phones are sent to
-`m.html`; everything else to `index.html`. A **"Mobile site" / "Desktop site"**
-link in the footer (`data-view`) records an explicit choice in `localStorage`
-(`siteView`), and `?mobile=1` / `?desktop=1` force it. The hash is preserved
-across the redirect.
-
-`m.html` is a plain vertical scroll: one portrait `<img>`, then the four sections
-stacked as real content (`.m-*` classes), with `.m-reveal` fade-up on scroll. It
-shares the nav, footer, connect dialog, `styles.css` and `script.js`.
-
-The **footer** (`#footer`): full-bleed, compact. HUD corner brackets,
-`LET'S CONNECT`, a "Start a conversation" button, a three-column block, angle
-ticks and a decorative arc. Its pieces fade up via `.reveal` + `IntersectionObserver`.
-
-## FAQ page
-
-`faq.html` (linked as **FAQs** in the nav — desktop and mobile — and in the
-footer). Editorial layout that matches the site: Anton headline
-`THE USEFUL ANSWERS, UP FRONT.`, a sticky topic navigator and four groups
-(Opportunities / Experience & skills / Projects / Working together) of native
-`<details>`/`<summary>` accordions — three questions each, twelve total.
-
-- Accessible by default: native disclosure semantics, keyboard operable, visible
-  `:focus-visible` outlines, a CSS plus/minus indicator, a subtle open animation
-  that `prefers-reduced-motion` disables.
-- `initFaq()` keeps one item open per group (opening a second closes the first);
-  cross-group items are independent.
-- `FAQPage` JSON-LD in the `<head>` mirrors the visible Q&A.
-- Ends with `Still curious? Let's connect.` — `Email me`
-  (`mailto:uttamtorry@gmail.com?subject=Software%20development%20opportunity`),
-  GitHub and LinkedIn.
-
-## Navigation & links
-
-- **Nav** (shared markup on both pages): brand → `index.html#top`; links
-  Home / About / Projects / Capabilities → `index.html#…`, FAQs → `faq.html`
-  (`aria-current="page"` on the current page), Download CV. Below 1080px the
-  links collapse into a slide-in drawer toggled by `#navToggle` (`initNav()` —
-  `aria-expanded`, `.nav.is-open`, closes on link click / Escape / outside click).
-- **Download CV** (nav + hero) → `assets/Uttam-Torry-CV-2026.pdf` with `download`
-  (see `assets/README.txt`).
-- **Scroll anchors** — invisible `.scroll-anchor` targets inside the pinned hero:
-  `#projects` 27% · `#about` 55% · `#capabilities` 82%. Footer links use the
-  `index.html#…` form so they also work from `faq.html`.
-- **Social icons** (hero + footer + connect dialog) → the real profiles
-  (`github.com/sarva-uttam`, `linkedin.com/in/uttam-torry-490702361`,
-  `facebook.com/share/1JbB2YLpCV`, `pinterest.com/sarva_uttam`,
-  `reddit.com/user/sarva-uttam`). Email everywhere is `mailto:`.
-
-## The "Start a conversation" chooser
-
-- **"Let's connect"** (hero) and **"Start a conversation"** (footer) are
-  `<button data-connect>` — they open `#connectModal`, a native `<dialog>`
-  (`initConnect()` in `script.js`) offering Email / LinkedIn / Facebook /
-  Pinterest / Reddit. Closes on the ✕, backdrop click, or Escape.
-
-## Tuning (top of `script.js`)
-
-```js
-var STAGE_W = 1280, STAGE_H = 720;   // the locked design stage
-var HERO_OUT  = [34, 68];            // hero disassembles over this frame range
-var WORK_IN   = [58, 98];  var WORK_OUT  = [118, 150];
-var ABOUT_IN  = [140, 182]; var ABOUT_OUT = [204, 236];
-var RING_IN   = [228, 272];          // cards fly out; then hold to the end
-var RING_REV  = [262, 298];          // the revolve
-var RING_ROT  = [-224, 26];          // start / end angle (~250° turn)
-var RING_R = 452, RING_CARD = 146;   // ring geometry (centre: .rp__ring in CSS)
-```
-
-`.hero { height: 900vh }` in `styles.css` controls scroll-per-frame. The desktop
-hero does **not** reflow at any width — it is a cover-fit poster; phones get
-`m.html` instead. Only the nav (→ drawer ≤ 1080px) and footer (→ 2 / 1 columns)
-stay responsive.
+</div>
