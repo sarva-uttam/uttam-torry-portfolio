@@ -1,47 +1,62 @@
 /* ============================================================
    Uttam Torry — scroll-scrubbed frame sequence
-   The pinned hero scrubs the full video (frames 1 → 300).
-   Overlay panels cross-fade as you scroll:
-     1 – 55   hero headline
-     ~66–124  Selected work
-     ~146–206 About
-     ~224–300 Core-capabilities ring  (then the footer scrolls in)
+   ------------------------------------------------------------
+   The pinned hero composes the scene on a LOCKED 1280x720 stage
+   that is cover-scaled to the viewport (--hsc). Everything inside
+   the stage is positioned in fixed design pixels / container units,
+   so the overlay components stay welded to the portrait at any
+   zoom level or window size.
+
+   Overlay panels assemble / disassemble (staggered, reversible)
+   as you scroll:
+     ~1 – 46   hero headline      (starts assembled, disassembles up)
+     ~64–140   Selected work
+     ~148–224  About
+     ~226–300  Core-capabilities ring  (assembles, revolves, holds)
    ============================================================ */
 (function () {
   "use strict";
 
   /* ---------- config ---------- */
   var FRAME_COUNT = 300;
-  var LAST_FRAME  = 300;                                   // scrub spans the whole video
-  var FRAME_PATH  = function (i) {
+  var LAST_FRAME  = 300;
+  var STAGE_W = 1280, STAGE_H = 720;
+  var FRAME_PATH = function (i) {
     return "assets/frames/ezgif-frame-" + String(i).padStart(3, "0") + ".jpg";
   };
 
-  var HERO_OUT      = [56, 74];        // frame range the hero overlay fades out over
-  var WORK_IN       = [66, 88];        // Selected work fades in
-  var WORK_OUT      = [124, 140];      // Selected work fades out
-  var ABOUT_IN      = [146, 168];      // About fades in
-  var ABOUT_OUT     = [206, 222];      // About fades out
-  var RING_IN       = [226, 242];      // ring fades in, then holds to the end (no fade-out)
-  var RING_ROT_WIN  = [0.12, 0.72];    // fraction of the ring's life where it actually revolves
-  var RING_ROT      = [-248, 22.5];    // start / end angle — a big ~270° turn
+  /* frame windows -> converted to scroll progress via fp().
+     Generous, overlapping ranges so panels cross-dissolve gently rather
+     than snapping. */
+  var HERO_OUT   = [34, 68];
+  var WORK_IN    = [58, 98];
+  var WORK_OUT   = [118, 150];
+  var ABOUT_IN   = [140, 182];
+  var ABOUT_OUT  = [204, 236];
+  var RING_IN    = [228, 272];
+  var RING_REV   = [262, 298];      // the revolve
+  var RING_ROT   = [-224, 26];      // start / end angle (~250deg turn)
+
+  /* ring geometry — fixed design px inside the stage
+     (centre comes from .rp__ring in CSS: 640, 400). A big circle so the
+     side arcs clear the portrait's face and the top / bottom run off-stage. */
+  var RING_R = 452, RING_CARD = 146;
 
   /* ---------- elements ---------- */
   var canvas    = document.getElementById("frameCanvas");
   var HAS_HERO  = !!canvas;
   var ctx       = HAS_HERO ? canvas.getContext("2d", { alpha: false }) : null;
   var hero      = document.getElementById("hero");
-  var heroLeft  = document.getElementById("heroLeft");
-  var heroRight = document.getElementById("heroRight");
+  var sticky    = hero ? hero.querySelector(".hero__sticky") : null;
+  var stage     = document.getElementById("heroStage");
+  var heroPanel = document.getElementById("heroPanel");
   var heroHint  = document.getElementById("heroHint");
   var workPanel = document.getElementById("workPanel");
   var aboutPanel= document.getElementById("aboutPanel");
-  var aboutEls  = aboutPanel ? [].slice.call(aboutPanel.querySelectorAll("[data-anim]")) : [];
   var ringPanel = document.getElementById("ringPanel");
   var ringStage = document.getElementById("ringStage");
   var ringOrbit = document.getElementById("ringOrbit");
   var ringCards = ringStage ? [].slice.call(ringStage.querySelectorAll(".rp__card")) : [];
-  var mqCompact = window.matchMedia("(max-width: 1080px)");
   var nav       = document.getElementById("nav");
   var navToggle = document.getElementById("navToggle");
   var loader    = document.getElementById("loader");
@@ -57,6 +72,31 @@
   var needsDraw    = true;
   var dpr          = Math.min(window.devicePixelRatio || 1, 2);
 
+  /* panel element lists, each entry { el, dir, order } */
+  var heroEls = [], workEls = [], aboutEls = [];
+  var ringHeadEls = [];
+
+  /* ============================================================
+     Helpers
+     ============================================================ */
+  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
+  function fp(frame)  { return (frame - 1) / (LAST_FRAME - 1); }
+  function ss(x, a, b) {
+    var t = clamp01((x - a) / (b - a));
+    return t * t * (3 - 2 * t);
+  }
+  function smooth(t) { t = clamp01(t); return t * t * (3 - 2 * t); }
+
+  var DIRV = {
+    l:  [-1,  0, -1],
+    r:  [ 1,  0,  1],
+    u:  [ 0,  1,  0],
+    d:  [ 0, -1,  0],
+    ul: [-1,  1, -1],
+    ur: [ 1,  1,  1],
+    s:  [ 0,  0,  0]
+  };
+
   /* ============================================================
      Image preloading
      ============================================================ */
@@ -68,8 +108,8 @@
           loadedFlags[idx] = true;
           loadedCount++;
           var pct = Math.round((loadedCount / FRAME_COUNT) * 100);
-          loaderBar.style.width = pct + "%";
-          loaderCt.textContent = pct;
+          if (loaderBar) loaderBar.style.width = pct + "%";
+          if (loaderCt) loaderCt.textContent = pct;
           if (idx === 0) needsDraw = true;
           if (loadedCount === FRAME_COUNT) finishLoading();
         };
@@ -78,19 +118,29 @@
       })(i);
     }
   }
-
   function finishLoading() {
+    if (!loader) return;
     loader.classList.add("is-done");
     setTimeout(function () { loader.setAttribute("hidden", ""); }, 700);
   }
 
   /* ============================================================
-     Canvas drawing (cover fit)
+     Stage scaling + canvas
      ============================================================ */
+  function setStageScale() {
+    if (!stage) return;
+    /* contain-fit: the whole 1280x720 poster (portrait + every overlay) scales
+       by ONE factor, so nothing can drift relative to anything else at any zoom
+       level. The stage shares the frame's 16:9 ratio, so the letterbox strips
+       (theme background) only appear on genuinely off-ratio windows. */
+    var s = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+    stage.style.setProperty("--hsc", s.toFixed(4));
+  }
+
   function resizeCanvas() {
     if (!HAS_HERO) return;
-    canvas.width  = Math.round(canvas.clientWidth * dpr);
-    canvas.height = Math.round(canvas.clientHeight * dpr);
+    canvas.width  = Math.round(STAGE_W * dpr);
+    canvas.height = Math.round(STAGE_H * dpr);
     needsDraw = true;
   }
 
@@ -107,123 +157,85 @@
     var idx = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(frameFloat)));
     var img = nearestLoaded(idx);
     if (!img || !img.naturalWidth) return;
-
     var cw = canvas.width, ch = canvas.height;
-    var iw = img.naturalWidth, ih = img.naturalHeight;
-    var scale = Math.max(cw / iw, ch / ih);
-    var dw = iw * scale, dh = ih * scale;
-    var dx = (cw - dw) / 2;
-    var dy = (ch - dh) / 2 + dh * 0.05; // bias down so his head isn't cropped at the top
-
+    // source frames are 1280x720 — same aspect as the stage, so fill exactly
     ctx.fillStyle = "#05080a";
     ctx.fillRect(0, 0, cw, ch);
-    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.drawImage(img, 0, 0, cw, ch);
   }
 
   /* ============================================================
-     Helpers
+     Panel assemble / disassemble
+     ------------------------------------------------------------
+     inP  0..1  assemble progress (0 = scattered, 1 = in place)
+     outP 0..1  disassemble progress (0 = in place, 1 = scattered)
+     Both are pure functions of scroll position, so the effect is
+     fully reversible when scrolling back up.
      ============================================================ */
-  function clamp01(v) { return v < 0 ? 0 : v > 1 ? 1 : v; }
-  function fp(frame) { return (frame - 1) / (LAST_FRAME - 1); }   // frame -> progress
-  function ss(x, a, b) {                                          // smoothstep
-    var t = clamp01((x - a) / (b - a));
-    return t * t * (3 - 2 * t);
-  }
-  function setVisible(el, on) {
-    var v = on ? "visible" : "hidden";
-    if (el.style.visibility !== v) el.style.visibility = v;
-  }
-
-  /* Staggered scroll-scrubbed reveal (About panel):
-     each element rises up from below while fading in, holds, then
-     keeps travelling up and fades out once the panel is scrolled past. */
-  var RISE = 70;
-  function staggerReveal(els, inP, outP) {
-    var n = els.length;
+  function panelAnim(list, inP, outP) {
+    var n = list.length;
     for (var i = 0; i < n; i++) {
-      var el = els[i];
-      var frac = i / n;
-      var e = clamp01((inP - frac * 0.45) / 0.5); e = e * e * (3 - 2 * e);
-      var o = clamp01((outP - frac * 0.35) / 0.55); o = o * o * (3 - 2 * o);
-      var ty = (1 - e) * RISE - o * RISE;
-      el.style.opacity = Math.min(e, 1 - o).toFixed(3);
-      el.style.transform = "translate3d(0," + ty.toFixed(1) + "px,0)";
+      var item = list[i];
+      var f = n > 1 ? item.order / (n - 1) : 0;
+      var a = smooth((inP - f * 0.5) / 0.5);
+      var d = smooth((outP - (1 - f) * 0.45) / 0.55);
+      var vis  = a * (1 - d);
+      var away = (1 - a) + d;                 // 0 = seated, ~1 = flung out
+      var v = DIRV[item.dir] || DIRV.u;
+      var D = 78;
+      item.el.style.opacity = vis.toFixed(3);
+      item.el.style.transform =
+        "translate3d(" + (v[0] * away * D).toFixed(1) + "px," +
+                         (v[1] * away * D).toFixed(1) + "px,0) " +
+        "scale(" + (1 - away * 0.14).toFixed(3) + ") " +
+        "rotate(" + (v[2] * away * 2).toFixed(2) + "deg)";
     }
   }
 
-  /* ============================================================
-     Panel 4 — a big circle of upright cards around the character.
-       scroll to it  → cards sit still (start angle)
-       scroll through → the ring makes a big turn
-       scroll past    → the ring freezes and holds
-     The circle is wide enough that its path stays well outside his
-     face; cards ride the left / right arcs near the screen edges and
-     the top / bottom of the circle run off-screen.
-     ============================================================ */
-  function updateRing(progress, inP) {
+  function setPanel(el, op) {
+    if (!el) return;
+    el.style.opacity = op.toFixed(3);
+    var vis = op > 0.001 ? "visible" : "hidden";
+    if (el.style.visibility !== vis) el.style.visibility = vis;
+  }
+
+  /* Core-capabilities ring — cards fly out from the centre along
+     their radial, revolve, then hold. Reverses on scroll-up. */
+  function updateRing(inP, revP) {
     var n = ringCards.length;
-
-    if (mqCompact.matches) {                     // small screens use the CSS grid
-      for (var m = 0; m < n; m++) {
-        ringCards[m].style.opacity = inP.toFixed(3);
-        ringCards[m].style.transform = "";
-        ringCards[m].style.zIndex = "";
-      }
-      return;
-    }
-
-    var vw = window.innerWidth, vh = window.innerHeight;
-    var stage = ringStage.getBoundingClientRect();
-    var cx = stage.left, cy = stage.top;
-
-    var R    = Math.max(340, Math.min(vw * 0.30, vh * 0.54, 460));
-    var card = Math.max(132, Math.min(vw * 0.11, 168));
-
-    var t0   = fp(RING_IN[0]);
-    var life = clamp01((progress - t0) / (1 - t0));
-    var rp = clamp01((life - RING_ROT_WIN[0]) / (RING_ROT_WIN[1] - RING_ROT_WIN[0]));
-    rp = rp * rp * (3 - 2 * rp);
-    var rot = RING_ROT[0] + rp * (RING_ROT[1] - RING_ROT[0]);
-
-    // safety keep-out around his face (the big radius already clears it)
-    var faceCx = vw * 0.52, faceCy = vh * 0.52;
-    var faceRx = vw * 0.13 + card * 0.5;
-    var faceRy = vh * 0.24 + card * 0.5;
+    if (!n) return;
+    var rot = RING_ROT[0] + smooth(revP) * (RING_ROT[1] - RING_ROT[0]);
 
     for (var i = 0; i < n; i++) {
       var el = ringCards[i];
-      var a  = (i / n) * 360 + rot;
-      var rad = a * Math.PI / 180;
-      var sin = Math.sin(rad);
-      var x = Math.cos(rad) * R, y = sin * R;
-      var sx = cx + x, sy = cy + y;
+      var f = n > 1 ? i / (n - 1) : 0;
+      var asm = smooth((inP - f * 0.45) / 0.55);
 
-      var front = (sin + 1) / 2;
-      var sc = 0.88 + 0.12 * front;
+      var ang = (i / n) * 360 + rot;
+      var rad = ang * Math.PI / 180;
+      var x = Math.cos(rad) * RING_R;
+      var y = Math.sin(rad) * RING_R;
+      var rr = 0.26 + 0.74 * asm;                 // radial fraction (centre -> ring)
+      var sc = 0.5 + 0.5 * asm;
+      var depth = (Math.sin(rad) + 1) / 2;        // 0 back .. 1 front
 
-      var dx = (sx - faceCx) / faceRx, dy = (sy - faceCy) / faceRy;
-      var faceClear = clamp01((Math.sqrt(dx * dx + dy * dy) - 1) / 0.1);
-
-      var mind = Math.min(sx, sy - 58, vw - sx, vh - sy);
-      var edge = clamp01((mind + card * 0.38) / (card * 0.62));
-
-      var hx = (sx - vw * 0.11) / (vw * 0.2), hy = (sy - vh * 0.13) / (vh * 0.16);
-      var headClear = clamp01((Math.sqrt(hx * hx + hy * hy) - 1) / 0.3);
-
-      el.style.setProperty("--card", card.toFixed(1) + "px");
-      el.style.opacity = (inP * faceClear * headClear * edge).toFixed(3);
-      el.style.zIndex = String(Math.round(front * 20));
+      el.style.setProperty("--card", RING_CARD + "px");
+      el.style.opacity = asm.toFixed(3);
+      el.style.zIndex = String(10 + Math.round(depth * 8));
       el.style.transform =
-        "translate3d(" + x.toFixed(1) + "px," + y.toFixed(1) + "px,0) scale(" + sc.toFixed(3) + ")";
+        "translate3d(" + (x * rr).toFixed(1) + "px," + (y * rr).toFixed(1) + "px,0) " +
+        "scale(" + sc.toFixed(3) + ")";
     }
 
-    ringOrbit.style.width = ringOrbit.style.height = (R * 2).toFixed(0) + "px";
-    ringOrbit.style.transform = "translate(-50%,-50%)";
-    ringOrbit.style.opacity = (0.45 * inP).toFixed(3);
+    if (ringOrbit) {
+      ringOrbit.style.width = ringOrbit.style.height = (RING_R * 2) + "px";
+      ringOrbit.style.transform = "translate(-50%,-50%)";
+      ringOrbit.style.opacity = (0.4 * smooth(inP)).toFixed(3);
+    }
   }
 
   /* ============================================================
-     Scroll → progress → frame + panels
+     Scroll -> progress -> frame + panels
      ============================================================ */
   function updateFromScroll() {
     if (!HAS_HERO) return;
@@ -232,42 +244,32 @@
     var scrolled = -rect.top;
     var progress = clamp01(runway > 0 ? scrolled / runway : 0);
 
-    targetFrame = progress * (LAST_FRAME - 1);   // progress 0..1 -> frame 1..LAST_FRAME
+    targetFrame = progress * (LAST_FRAME - 1);
 
-    /* hero overlay */
-    var out  = ss(progress, fp(HERO_OUT[0]), fp(HERO_OUT[1]));
-    var outR = ss(progress, fp(HERO_OUT[0] - 6), fp(HERO_OUT[1] - 6));
-    heroLeft.style.opacity    = String(1 - out);
-    heroLeft.style.transform  = "translateY(" + (-70 * out) + "px)";
-    heroRight.style.opacity   = String(1 - outR);
-    heroRight.style.transform = "translateY(" + (-95 * outR) + "px)";
-    var heroGone = out >= 1 && outR >= 1;
-    setVisible(heroLeft, !heroGone);
-    setVisible(heroRight, !heroGone);
+    /* hero headline — seated at rest, disassembles as you scroll down */
+    var heroOut = ss(progress, fp(HERO_OUT[0]), fp(HERO_OUT[1]));
+    panelAnim(heroEls, 1, heroOut);
 
     /* Selected work */
-    var workIn  = ss(progress, fp(WORK_IN[0]),  fp(WORK_IN[1]));
-    var workOut = ss(progress, fp(WORK_OUT[0]), fp(WORK_OUT[1]));
-    var workOp  = workIn * (1 - workOut);
-    workPanel.style.opacity = String(workOp);
-    workPanel.style.transform = "translateY(" + ((1 - workIn) * 48 - workOut * 60) + "px)";
-    setVisible(workPanel, workOp > 0.02);
+    var wIn  = ss(progress, fp(WORK_IN[0]),  fp(WORK_IN[1]));
+    var wOut = ss(progress, fp(WORK_OUT[0]), fp(WORK_OUT[1]));
+    setPanel(workPanel, ss(progress, fp(WORK_IN[0] - 4), fp(WORK_IN[1])) * (1 - wOut));
+    panelAnim(workEls, wIn, wOut);
 
     /* About */
-    var aboutIn  = ss(progress, fp(ABOUT_IN[0]),  fp(ABOUT_IN[1]));
-    var aboutOut = ss(progress, fp(ABOUT_OUT[0]), fp(ABOUT_OUT[1]));
-    var aboutOp  = aboutIn * (1 - aboutOut);
-    aboutPanel.style.opacity = String(aboutOp);
-    setVisible(aboutPanel, aboutOp > 0.02);
-    if (aboutOp > 0.001) staggerReveal(aboutEls, aboutIn, aboutOut);
+    var aIn  = ss(progress, fp(ABOUT_IN[0]),  fp(ABOUT_IN[1]));
+    var aOut = ss(progress, fp(ABOUT_OUT[0]), fp(ABOUT_OUT[1]));
+    setPanel(aboutPanel, ss(progress, fp(ABOUT_IN[0] - 4), fp(ABOUT_IN[1])) * (1 - aOut));
+    panelAnim(aboutEls, aIn, aOut);
 
-    /* Core-capabilities ring — fades in, then holds until the pin releases */
-    var ringIn = ss(progress, fp(RING_IN[0]), fp(RING_IN[1]));
-    ringPanel.style.opacity = String(ringIn);
-    setVisible(ringPanel, ringIn > 0.02);
-    if (ringIn > 0.001) updateRing(progress, ringIn);
+    /* Core-capabilities ring — assembles then holds (no disassemble down) */
+    var rIn  = ss(progress, fp(RING_IN[0]), fp(RING_IN[1]));
+    var rRev = ss(progress, fp(RING_REV[0]), fp(RING_REV[1]));
+    setPanel(ringPanel, ss(progress, fp(RING_IN[0] - 4), fp(RING_IN[1])));
+    panelAnim(ringHeadEls, rIn, 0);
+    if (rIn > 0.0005 || progress > fp(RING_IN[0]) - 0.02) updateRing(rIn, rRev);
 
-    heroHint.style.opacity = progress > 0.015 ? "0" : "1";
+    if (heroHint) heroHint.style.opacity = progress > 0.012 ? "0" : "1";
 
     needsDraw = true;
   }
@@ -278,7 +280,6 @@
   function tick() {
     currentFrame += (targetFrame - currentFrame) * 0.16;
     if (Math.abs(targetFrame - currentFrame) < 0.05) currentFrame = targetFrame;
-
     if (needsDraw || Math.abs(targetFrame - currentFrame) >= 0.01) {
       drawFrame(currentFrame);
       needsDraw = false;
@@ -287,15 +288,48 @@
   }
 
   /* ============================================================
-     Nav + reveal on scroll
+     Build panel element lists (measure once — the stage never
+     reflows, so rest positions are stable forever)
+     ============================================================ */
+  function collect(container, selector, forceDir) {
+    if (!container) return [];
+    var els = [].slice.call(container.querySelectorAll(selector));
+    return els.map(function (el, i) {
+      var dir = forceDir;
+      if (!dir) {
+        var r = el.getBoundingClientRect();
+        var cs = stage.getBoundingClientRect();
+        var sc = parseFloat(getComputedStyle(stage).getPropertyValue("--hsc")) || 1;
+        var cx = (r.left + r.width / 2 - cs.left) / sc;   // design-px centre
+        dir = cx < STAGE_W * 0.46 ? "l" : cx > STAGE_W * 0.54 ? "r" : "u";
+      }
+      return { el: el, dir: dir, order: i };
+    });
+  }
+
+  function initPanels() {
+    if (!stage) return;
+    heroEls = collect(document.getElementById("heroLeft"), "[data-anim]", "l")
+      .concat(collect(document.getElementById("heroRight"), "[data-anim]", "r"));
+    heroEls.forEach(function (it, i) { it.order = i; });
+
+    workEls = collect(workPanel, "[data-anim]");
+    workEls.forEach(function (it, i) { it.order = i; });
+
+    aboutEls = collect(aboutPanel, "[data-anim]");
+    aboutEls.forEach(function (it, i) { it.order = i; });
+
+    ringHeadEls = collect(ringPanel, "[data-anim]", "l");
+    ringHeadEls.forEach(function (it, i) { it.order = i; });
+  }
+
+  /* ============================================================
+     Nav + reveal + mobile drawer + FAQ accordion + view switch
      ============================================================ */
   function onScrollNav() {
     if (nav) nav.classList.toggle("is-stuck", window.scrollY > 40);
   }
 
-  /* ============================================================
-     Mobile navigation drawer
-     ============================================================ */
   function initNav() {
     if (!nav || !navToggle) return;
     var links = document.getElementById("navLinks");
@@ -313,8 +347,7 @@
     }
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape" && nav.classList.contains("is-open")) {
-        setOpen(false);
-        navToggle.focus();
+        setOpen(false); navToggle.focus();
       }
     });
     document.addEventListener("click", function (e) {
@@ -322,13 +355,43 @@
     });
   }
 
-  /* ============================================================
-     FAQ accordion — native <details>, one open per group
-     ============================================================ */
+  function initReveal() {
+    var els = document.querySelectorAll(".reveal, .m-reveal");
+    if (!els.length) return;
+    if (!("IntersectionObserver" in window)) {
+      els.forEach(function (el) { el.classList.add("is-in"); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); }
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px 4% 0px" });
+    els.forEach(function (el, i) {
+      el.style.transitionDelay = (i % 6) * 0.06 + "s";
+      io.observe(el);
+    });
+  }
+
+  function initConnect() {
+    var modal = document.getElementById("connectModal");
+    if (!modal) return;
+    var open = function (e) { e.preventDefault(); if (modal.showModal) modal.showModal(); else modal.setAttribute("open", ""); };
+    var close = function () { if (modal.close) modal.close(); else modal.removeAttribute("open"); };
+    document.querySelectorAll("[data-connect]").forEach(function (b) { b.addEventListener("click", open); });
+    modal.querySelectorAll("[data-connect-close]").forEach(function (b) { b.addEventListener("click", close); });
+    modal.addEventListener("click", function (e) { if (e.target === modal) close(); });
+    modal.addEventListener("cancel", function (e) { e.preventDefault(); close(); });
+    modal.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+    modal.querySelectorAll(".connect__list a").forEach(function (a) {
+      a.addEventListener("click", function () { setTimeout(close, 60); });
+    });
+  }
+
   function initFaq() {
-    var groups = document.querySelectorAll(".faq-group .faq-list");
-    if (!groups.length) return;
-    groups.forEach(function (list) {
+    var lists = document.querySelectorAll(".faq-group .faq-list");
+    if (!lists.length) return;
+    lists.forEach(function (list) {
       var items = [].slice.call(list.querySelectorAll("details.faq-item"));
       items.forEach(function (d) {
         d.addEventListener("toggle", function () {
@@ -339,78 +402,44 @@
     });
   }
 
-  function initReveal() {
-    var els = document.querySelectorAll(".reveal");
-    if (!("IntersectionObserver" in window)) {
-      els.forEach(function (el) { el.classList.add("is-in"); });
-      return;
-    }
-    var io = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) {
-          e.target.classList.add("is-in");
-          io.unobserve(e.target);
-        }
+  /* remember an explicit "view desktop / mobile site" choice */
+  function initViewSwitch() {
+    document.querySelectorAll("[data-view]").forEach(function (a) {
+      a.addEventListener("click", function () {
+        try { localStorage.setItem("siteView", a.getAttribute("data-view")); } catch (e) {}
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px 4% 0px" });
-    els.forEach(function (el, i) {
-      el.style.transitionDelay = (i % 5) * 0.07 + "s";
-      io.observe(el);
-    });
-  }
-
-  /* ============================================================
-     "Start a conversation" chooser
-     ============================================================ */
-  function initConnect() {
-    var modal = document.getElementById("connectModal");
-    if (!modal) return;
-    var open = function (e) { e.preventDefault(); if (modal.showModal) modal.showModal(); else modal.setAttribute("open", ""); };
-    var close = function () { if (modal.close) modal.close(); else modal.removeAttribute("open"); };
-
-    document.querySelectorAll("[data-connect]").forEach(function (b) {
-      b.addEventListener("click", open);
-    });
-    modal.querySelectorAll("[data-connect-close]").forEach(function (b) {
-      b.addEventListener("click", close);
-    });
-    // click on the backdrop (the dialog element itself, outside the content)
-    modal.addEventListener("click", function (e) {
-      if (e.target === modal) close();
-    });
-    modal.addEventListener("cancel", function (e) { e.preventDefault(); close(); }); // Esc
-    modal.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
-    // a channel was picked — let it open, then dismiss the chooser
-    modal.querySelectorAll(".connect__list a").forEach(function (a) {
-      a.addEventListener("click", function () { setTimeout(close, 60); });
     });
   }
 
   /* ============================================================
      Boot
      ============================================================ */
-  function onScroll() {
-    updateFromScroll();
-    onScrollNav();
-  }
-
-  window.addEventListener("scroll", onScroll, { passive: true });
-  window.addEventListener("resize", function () {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
-    resizeCanvas();
-    updateFromScroll();
-  });
+  function onScroll() { updateFromScroll(); onScrollNav(); }
 
   onScrollNav();
   initNav();
   initReveal();
   initConnect();
   initFaq();
+  initViewSwitch();
 
   if (HAS_HERO) {
+    setStageScale();
     resizeCanvas();
+    initPanels();
     updateFromScroll();
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", function () {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      setStageScale();
+      resizeCanvas();
+      updateFromScroll();
+    });
+
     preload();
     requestAnimationFrame(tick);
+  } else {
+    window.addEventListener("scroll", onScrollNav, { passive: true });
   }
 })();

@@ -3,6 +3,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- device routing: phones get the dedicated mobile build (m.html) -->
+  <script>
+  (function () {
+    try {
+      var loc = location, q = loc.search;
+      var pref = null; try { pref = localStorage.getItem("siteView"); } catch (e) {}
+      if (/[?&](desktop|full)=1/.test(q)) { pref = "desktop"; try { localStorage.setItem("siteView", "desktop"); } catch (e) {} }
+      if (/[?&]mobile=1/.test(q))         { pref = "mobile";  try { localStorage.setItem("siteView", "mobile");  } catch (e) {} }
+      var mm = window.matchMedia;
+      var coarse  = mm && (mm("(pointer: coarse)").matches || mm("(hover: none)").matches);
+      var minSide = Math.min(screen.width || 9999, screen.height || 9999);
+      var ua = /Android|iPhone|iPod|Windows Phone|IEMobile|BlackBerry|Opera Mini|Mobile Safari|webOS/i.test(navigator.userAgent);
+      var isPhone = ua || (coarse && (minSide <= 560 || window.innerWidth <= 760));
+      var wantMobile = pref === "mobile" || (pref !== "desktop" && isPhone);
+      var page = (loc.pathname.split("/").pop() || "index.html");
+      if (wantMobile && page !== "m.html") loc.replace("m.html" + loc.hash);
+      else if (!wantMobile && page === "m.html") loc.replace("index.html" + loc.hash);
+    } catch (e) {}
+  })();
+  </script>
+
   <title>Uttam Torry — Graduate Software Developer</title>
   <meta name="description" content="Graduate software developer building thoughtful digital products. Front-end, TypeScript, testing and technical documentation. Based in Mauritius, open to relocation." />
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%2305080a'/%3E%3Ctext x='16' y='23' font-family='Arial' font-weight='bold' font-size='18' fill='%2335d07f' text-anchor='middle'%3EUT%3C/text%3E%3C/svg%3E" />
@@ -50,6 +72,7 @@
       <span class="scroll-anchor" id="about" aria-hidden="true"></span>
       <span class="scroll-anchor" id="capabilities" aria-hidden="true"></span>
       <div class="hero__sticky">
+       <div class="hero__stage" id="heroStage">
         <canvas class="hero__canvas" id="frameCanvas"></canvas>
         <div class="hero__vignette" aria-hidden="true"></div>
         <div class="hero__rings" aria-hidden="true"></div>
@@ -58,17 +81,17 @@
         <div class="hero__grid" id="heroPanel">
 
           <div class="hero__left" id="heroLeft">
-            <p class="pill"><span class="pill__dot"></span> Available <span class="pill__muted">for graduate and junior roles</span></p>
+            <p class="pill" data-anim><span class="pill__dot"></span> Available <span class="pill__muted">for graduate and junior roles</span></p>
 
-            <h1 class="hero__title">Graduate software developer building thoughtful digital products.</h1>
+            <h1 class="hero__title" data-anim>Graduate software developer building thoughtful digital products.</h1>
 
-            <p class="hero__body">
+            <p class="hero__body" data-anim>
               I work across responsive front-end development, TypeScript engineering,
               testing and technical documentation. Based in Mauritius and open to
               relocation and international opportunities.
             </p>
 
-            <div class="hero__actions">
+            <div class="hero__actions" data-anim>
               <button class="explore" type="button" data-connect>
                 <span class="explore__ring"><span class="explore__arrow" aria-hidden="true">&#8594;</span></span>
                 <span class="explore__label">Let&#8217;s<br />connect</span>
@@ -76,7 +99,7 @@
               <a class="link-underline" href="assets/Uttam-Torry-CV-2026.pdf" download>Download CV</a>
             </div>
 
-            <ul class="hero__social">
+            <ul class="hero__social" data-anim>
               <li><a href="https://github.com/sarva-uttam" target="_blank" rel="noopener">GitHub <span aria-hidden="true">&#8599;</span></a></li>
               <li><a href="https://www.linkedin.com/in/uttam-torry-490702361/" target="_blank" rel="noopener">LinkedIn <span aria-hidden="true">&#8599;</span></a></li>
               <li><a href="mailto:uttamtorry@gmail.com">uttamtorry@gmail.com</a></li>
@@ -84,7 +107,7 @@
           </div>
 
           <div class="hero__right" id="heroRight">
-            <div class="fact">
+            <div class="fact" data-anim>
               <p class="fact__idx">01 / <span>Current focus</span></p>
               <p class="fact__lead">Web applications, developer tools and product engineering</p>
               <div class="fact__graph" aria-hidden="true">
@@ -96,14 +119,14 @@
               </div>
             </div>
 
-            <div class="fact fact--edu">
+            <div class="fact fact--edu" data-anim>
               <span class="fact__bignum" aria-hidden="true">26</span>
               <p class="fact__idx">02 / <span>Education</span></p>
               <p class="fact__lead">Bachelor of Software Engineering</p>
               <p class="fact__meta">2026</p>
             </div>
 
-            <div class="fact">
+            <div class="fact" data-anim>
               <p class="fact__idx">03 / <span>Location</span></p>
               <p class="fact__lead">Mauritius</p>
               <p class="fact__meta">Open to relocation</p>
@@ -117,13 +140,13 @@
         <div class="wp" id="workPanel">
           <div class="wp__inner">
             <div class="wp__col wp__col--left">
-              <header class="wp__head">
+              <header class="wp__head" data-anim>
                 <p class="wp__label">02 <span>/</span> Selected work</p>
                 <div class="wp__rule" aria-hidden="true"></div>
                 <h2 class="wp__title">Projects that show how I think and build</h2>
               </header>
 
-              <article class="wp-card">
+              <article class="wp-card" data-anim>
                 <span class="wp-card__num" aria-hidden="true">01</span>
                 <p class="wp-card__id">01 <span>/ ISeeCode</span></p>
                 <p class="wp-card__cat">Visual code interpreter</p>
@@ -138,7 +161,7 @@
                 <a class="wp-card__link" href="https://github.com/" target="_blank" rel="noopener">View repository <span aria-hidden="true">&#8599;</span></a>
               </article>
 
-              <article class="wp-card">
+              <article class="wp-card" data-anim>
                 <span class="wp-card__num" aria-hidden="true">02</span>
                 <p class="wp-card__id">02 <span>/ Enveloped</span></p>
                 <p class="wp-card__cat">Digital invitations</p>
@@ -159,7 +182,7 @@
             </div>
 
             <div class="wp__col wp__col--right">
-              <article class="wp-card">
+              <article class="wp-card" data-anim>
                 <span class="wp-card__num" aria-hidden="true">03</span>
                 <p class="wp-card__id">03 <span>/ Zordi Budget Tracker</span></p>
                 <p class="wp-card__cat">Civic technology</p>
@@ -174,7 +197,7 @@
                 <a class="wp-card__link" href="#footer">Case study <span aria-hidden="true">&#8599;</span></a>
               </article>
 
-              <article class="wp-card">
+              <article class="wp-card" data-anim>
                 <span class="wp-card__num" aria-hidden="true">04</span>
                 <p class="wp-card__id">04 <span>/ Bwoo &amp; Bloo&#8217;s Books</span></p>
                 <p class="wp-card__cat">Creative publishing system</p>
@@ -193,7 +216,7 @@
               </article>
             </div>
           </div>
-          <div class="wp__angles" aria-hidden="true"><i>40&deg;</i><i>30&deg;</i><i>20&deg;</i></div>
+          <div class="wp__angles" aria-hidden="true" data-anim><i>40&deg;</i><i>30&deg;</i><i>20&deg;</i></div>
         </div>
         <!-- /PANEL -->
 
@@ -238,9 +261,9 @@
           </p>
 
           <div class="wp__angles" aria-hidden="true"><i>40&deg;</i><i>30&deg;</i><i>20&deg;</i></div>
-          <span class="ap__cross" aria-hidden="true"></span>
+          <span class="ap__cross" aria-hidden="true" data-anim></span>
 
-          <svg class="ap__graph" viewBox="0 0 320 60" preserveAspectRatio="none" aria-hidden="true">
+          <svg class="ap__graph" viewBox="0 0 320 60" preserveAspectRatio="none" aria-hidden="true" data-anim>
             <path d="M0,50 C46,50 60,30 104,34 C150,38 165,14 210,20 C250,25 274,40 300,8" />
             <circle cx="300" cy="8" r="3.4" />
           </svg>
@@ -249,7 +272,7 @@
 
         <!-- PANEL — core capabilities ring -->
         <div class="rp" id="ringPanel">
-          <header class="rp__head">
+          <header class="rp__head" data-anim>
             <p class="wp__label">04 <span>/</span> Core capabilities</p>
             <div class="wp__rule" aria-hidden="true"></div>
             <p class="rp__sub">What I build with &mdash; circling past.</p>
@@ -275,6 +298,7 @@
           <span>Scroll</span>
           <span class="hero__hint-line"></span>
         </div>
+       </div>
       </div>
     </section>
 
@@ -333,7 +357,11 @@
         <circle cx="42" cy="150" r="3.4" />
       </svg>
 
-      <p class="foot-copy reveal">&copy; 2026 Uttam Torry. All rights reserved.</p>
+      <p class="foot-copy reveal">
+        &copy; 2026 Uttam Torry. All rights reserved.
+        <span class="foot-sep" aria-hidden="true">/</span>
+        <a class="foot-switch" href="m.html?mobile=1" data-view="mobile">Mobile site</a>
+      </p>
     </footer>
 
   </main>
