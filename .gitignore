@@ -1,5 +1,6 @@
-# source duplicate of assets/frames — not needed for the site
+# source duplicates of assets/frames — not needed for the site
 Video frames/
+HD frames/
 
 # local tooling (may contain machine-local auth tokens — never commit)
 .semgrep/
