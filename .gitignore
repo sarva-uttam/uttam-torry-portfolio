@@ -3,6 +3,7 @@ Video frames/
 
 # local tooling (may contain machine-local auth tokens — never commit)
 .semgrep/
+.claude/
 .playwright-mcp/
 .vscode/
 .idea/

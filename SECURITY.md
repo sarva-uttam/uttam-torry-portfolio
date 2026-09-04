@@ -8,7 +8,7 @@ image/PDF assets) published with GitHub Pages at
 <https://sarva-uttam.github.io/uttam-torry-portfolio/>.
 
 There is **no backend, database, authentication, session, cookie, form
-submission, file upload, payment flow or AI feature.** The site is HTML, CSS and
+submission, file upload or payment flow.** The site is HTML, CSS and
 client-side JavaScript served as static files. This shapes everything below: most
 classic web-app controls (rate limiting, quotas, CAPTCHA, CSRF tokens, server
 authorization, injection defence) have **no server to apply to** and are recorded

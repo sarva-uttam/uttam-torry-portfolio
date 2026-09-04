@@ -7,11 +7,11 @@ billable operation. This site has none:
 
 | Control | Why N/A today |
 |---------|---------------|
-| Rate limiting (login / registration / password reset / contact / search / upload / DB mutation / public API / AI / webhooks / admin) | No backend, no API, no auth provider, no serverless function. Nothing receives a request except the GitHub Pages CDN serving a file. |
+| Rate limiting (login / registration / password reset / contact / search / upload / DB mutation / public API / webhooks / admin) | No backend, no API, no auth provider, no serverless function. Nothing receives a request except the GitHub Pages CDN serving a file. |
 | Usage quotas (per-user / per-session / daily / monthly / payload / duration / concurrency) | No authenticated or metered feature. |
 | Server-side throttling / concurrency limits / timeouts / backoff | No server-side work to throttle. |
-| CAPTCHA (contact / registration / password reset / repeated failed login / anonymous AI) | Contact is a `mailto:` link only. There is **no submitted form** anywhere on the site. Adding a form + CAPTCHA purely to "look secure" is explicitly out of scope. |
-| Cost controls (spend ceilings / token caps / model allowlists / circuit breakers / budget alerts) | No billable third-party call. Google Fonts is free and unmetered. No AI. No payments. |
+| CAPTCHA (contact / registration / password reset / repeated failed login / anonymous high-cost actions) | Contact is a `mailto:` link only. There is **no submitted form** anywhere on the site. Adding a form + CAPTCHA purely to "look secure" is explicitly out of scope. |
+| Cost controls (spend ceilings / output caps / provider allow-lists / circuit breakers / budget alerts) | No billable third-party call. Google Fonts is free and unmetered. No paid third-party APIs. No payments. |
 
 The **one** abuse vector that does exist is **bandwidth exhaustion**: GitHub Pages
 has a soft limit of ~100 GB/month and ~10 build/hour. A script repeatedly
@@ -31,14 +31,14 @@ Mitigations, in order of preference:
 
 ## If the site ever gains a backend (policy to apply then)
 
-If a contact form, newsletter signup, comment system, guestbook, AI feature or
-any authenticated area is added later, implement **before shipping it**:
+If a contact form, newsletter signup, comment system, guestbook or any
+authenticated area is added later, implement **before shipping it**:
 
 - **Rate limits, per endpoint, not one global limit.** Suggested starting points:
   - contact/newsletter submit: 3 / 10 min / IP **and** 20 / day / IP, plus a CAPTCHA (Cloudflare Turnstile, verified server-side).
   - any auth endpoint: 5 / 15 min / IP for failures, 10 / hour / account; never reveal whether an account/email exists; return `429` with a bounded `Retry-After`.
   - search / expensive read: 30 / min / IP.
-  - AI / generation: per-user + global daily token budget, hard max tokens & timeout per call, model allow-list, circuit breaker, budget alert at 70 %/90 %.
+  - any expensive third-party / generation call: per-user + global daily budget, a hard timeout and output cap per call, a provider allow-list, a circuit breaker, and a budget alert at 70 %/90 %.
 - **Quotas** enforced server-side with atomic check-and-increment (no browser-supplied counters, no read-then-write races).
 - **Payload caps**: max body size, max upload size, request timeout, max concurrency.
 - **Cost ceilings**: per-day and per-month spend caps that hard-stop the feature; keys stay server-side and are never shipped to the browser.
