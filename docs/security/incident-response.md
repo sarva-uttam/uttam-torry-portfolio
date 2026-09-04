@@ -11,7 +11,7 @@ Small static site, single owner. Keep it simple. Work top to bottom.
 ## 1. If the live site is defaced or serving unexpected content
 
 - [ ] Check the last few commits on `master`: `git log --oneline -10 origin/master`. Anything you didn't push?
-- [ ] Check recent Actions runs: <https://github.com/sarva-uttam/uttam-torry-portfolio/actions>. Any deploy you didn't trigger?
+- [ ] Check recent Actions runs: <https://github.com/sarva-uttam/PORTFOLIO/actions>. Any deploy you didn't trigger?
 - [ ] If a bad commit is live: `git revert <sha>` (do **not** force-push), push, let the deploy run, confirm the site is clean.
 - [ ] If the GitHub account itself is compromised, go to section 3 first.
 - [ ] As a fast kill-switch: repo **Settings → Pages → unpublish**, or disable the Pages source, until fixed.
@@ -54,7 +54,7 @@ Small static site, single owner. Keep it simple. Work top to bottom.
 ## Contacts / references
 
 - Owner: uttamtorry@gmail.com
-- Repo: <https://github.com/sarva-uttam/uttam-torry-portfolio>
-- Live: <https://sarva-uttam.github.io/uttam-torry-portfolio/>
+- Repo: <https://github.com/sarva-uttam/PORTFOLIO>
+- Live: <https://sarva-uttam.github.io/PORTFOLIO/>
 - GitHub Pages status: <https://www.githubstatus.com/>
 - GitHub security docs: <https://docs.github.com/code-security>
