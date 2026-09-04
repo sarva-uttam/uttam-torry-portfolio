@@ -140,7 +140,7 @@ stay responsive.
 
 ## Security
 
-This is a static site (no backend, DB, auth, forms, payments or AI), so the
+This is a static site (no backend, database, auth, forms or payments), so the
 security surface is small. What's in place:
 
 - Strict `<meta>` **Content-Security-Policy** on every page (`script-src 'self'`,

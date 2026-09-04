@@ -37,7 +37,7 @@ Legend for **Applicable?**
 | Usage quotas | N/A | no authenticated or metered feature | — | — | — |
 | Request throttling (server) | N/A | no server | — | — | — |
 | CAPTCHA | N/A | contact is `mailto:` only; no submitted form | — | — | — |
-| Cost controls | N/A | no billable feature; Google Fonts is free/unmetered; no AI; no payments | — | — | — |
+| Cost controls | N/A | no billable feature; Google Fonts is free/unmetered; no payments | — | — | — |
 | Denial of service | Hosting config | GitHub Pages CDN + soft ~100 GB/month bandwidth limit | documented | — | Sustained scripted downloads could exhaust the monthly allowance → site suspended until reset. Fix: **Cloudflare (free) in front** for cache + rate limiting; or accept (personal site, low target value). |
 | Secrets in repo / history | Already protected | none present | verified via full-history `git log -p` secret-pattern scan (0 hits); no `package.json`/`.env`/keys; broadened `.gitignore` | scan output | — |
 | Secret scanning (GitHub) | Already protected / Hosting config | secret scanning **ON**, push protection **ON** | documented recommendation to also enable *non-provider patterns* + *validity checks* | `gh api .../security_and_analysis` | Generic-format tokens (e.g. the local Semgrep JWT) aren't caught until non-provider patterns are on |
