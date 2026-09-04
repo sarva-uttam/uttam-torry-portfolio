@@ -5,8 +5,8 @@ static personal site. "Owner action" means it cannot be fixed in code.
 
 | ID | Risk | Severity | Status | Recommended action |
 |----|------|----------|--------|--------------------|
-| **R1** | **Full residential address published** on `index.html`, `faq.html`, `m.html` (footer) and inside `assets/Uttam-Torry-CV-2026.pdf`, with a Google Maps deep-link. Enables doxxing / physical-safety risk and social-engineering ("I saw you live at …"). | **High** | **Blocked — owner decision** | Replace the street address with region only. Minimum safer alternative: `Rivière du Rempart, Mauritius` (or just `Mauritius — open to relocation`) and drop the Maps link. Re-export the CV PDF the same way. Recruiters do not need a house number. A ready-to-apply diff is in the appendix below. |
-| **R2** | **No hosting-level response headers.** GitHub Pages cannot send `X-Content-Type-Options`, `Permissions-Policy`, `X-Frame-Options`; `<meta>` CSP cannot express `frame-ancestors`. Site can be framed; MIME-sniff protection relies on GitHub typing assets correctly. | Medium | Open — needs a header-capable host | Put Cloudflare (free) in front of the `github.io` site, or move to Cloudflare Pages / Netlify / Vercel, and add the header set in `control-matrix.md`. Also enables edge caching (helps R5). |
+| **R1** | **Full residential address** was published on `index.html`, `faq.html`, `m.html` (footer) and inside `assets/Uttam-Torry-CV-2026.pdf`. | High → **Low** | **Site fixed; CV PDF outstanding** | The three pages now show region only: `Rivière du Rempart, Mauritius` (plain text, no Google Maps link). **Still to do (owner):** re-export `Uttam-Torry-CV-2026.pdf` from a source whose contact line reads `Rivière du Rempart, Mauritius` (or `Mauritius`) instead of the street address, then re-run `pdfinfo` to confirm metadata stays clean. Until then the address is still downloadable via the "Download CV" button. |
+| **R2** | **No hosting-level response headers.** GitHub Pages cannot send `X-Content-Type-Options`, `Permissions-Policy`, `X-Frame-Options`; a `<meta>` CSP cannot express `frame-ancestors`. | Medium | **Fixed on header-capable hosts; open on GitHub Pages** | A `_headers` file (repo root) now carries the full real header set. It is honoured by Tiiny Host (paid), Netlify, Cloudflare Pages, etc. **GitHub Pages ignores `_headers`** — there the `<meta>` CSP + `<meta>` referrer remain the baseline, and fully closing this needs Cloudflare (free) in front or a move to a header-capable host. |
 | **R3** | **No branch protection on `master`.** A compromised owner GitHub session can push straight to production; force-push/history-rewrite is possible. | Medium | Open — owner action | Enable branch protection: block force-push + deletion; optionally require the deploy workflow to pass. Keep 2FA on the GitHub account. |
 | **R4** | **Supply chain: Google Fonts.** Runtime dependency on `fonts.googleapis.com` / `fonts.gstatic.com`. A compromise there could serve malicious CSS; Google also sees each visitor's IP + referrer. | Low–Medium | Open — owner decision | Self-host the four families (all OFL-licensed): download `woff2`, add a local `@font-face` block, remove the two `fonts.*` origins from CSP and the `<link>`/`preconnect`. ~250 KB added to the repo; removes a whole trust boundary and a GDPR-flavoured privacy issue. |
 | **R5** | **Bandwidth-exhaustion DoS.** Scripted repeated downloads of the ~5 MB hero-frame set could trip the GitHub Pages ~100 GB/month soft limit and suspend the site until reset. No data or money at risk. | Low | Accepted (or fix via R2) | Cloudflare edge caching makes this impractical. Otherwise accept — self-heals monthly. |
@@ -16,19 +16,14 @@ static personal site. "Owner action" means it cannot be fixed in code.
 | **R9** | **Third-party outbound-link risk.** Links to LinkedIn/GitHub/Facebook/Pinterest/Reddit/Google Maps — those destinations' security is outside our control. | Low | Accepted | `rel="noopener noreferrer"` limits tab-nabbing + referrer leakage. |
 | **R10** | **`.claude/launch.json` tracked in the repo** — runs `npx --yes serve` for local preview (auto-installs an unpinned npm package on the owner's machine at dev time; never in CI or prod). | Info | Accepted | Optional: use `python -m http.server` (already the documented method) and drop `.claude/` from the repo. No production impact. |
 
-## Appendix — prepared diff for R1 (apply only with owner approval)
+## Appendix — R1 CV PDF remediation (owner to complete)
 
-In `index.html`, `faq.html`, `m.html`, replace the address `<li>` in the footer
-`Contact` column:
+The three HTML pages are done. The remaining step is the CV:
 
-```html
-<!-- before -->
-<li><a href="https://www.google.com/maps/search/?api=1&amp;query=House+3+Reservoir+Rd+Roche+Terre+Riviere+du+Rempart+Mauritius" target="_blank" rel="noopener noreferrer">House 3, Reservoir Rd, Roche Terre,<br />Riviere du Rempart, Mauritius</a></li>
-
-<!-- after (recommended minimum) -->
-<li>Rivière du Rempart, Mauritius <span aria-hidden="true">/</span> open to relocation</li>
-```
-
-Then regenerate `assets/Uttam-Torry-CV-2026.pdf` from a source where the contact
-line reads `Rivière du Rempart, Mauritius` (or `Mauritius`) instead of the street
-address, and re-run `pdfinfo` to confirm metadata stays clean.
+1. In the source document for the CV, change the contact line from
+   `House 3, Reservoir Rd, Roche Terre / Rivière du Rempart, Mauritius`
+   to `Rivière du Rempart, Mauritius` (or just `Mauritius`).
+2. Re-export to `assets/Uttam-Torry-CV-2026.pdf` (keep the filename — the nav
+   and hero link to it).
+3. Verify: `pdftotext assets/Uttam-Torry-CV-2026.pdf - | grep -i "reservoir\|roche terre"` returns nothing,
+   and `pdfinfo assets/Uttam-Torry-CV-2026.pdf` still shows no personal Author/Title.
