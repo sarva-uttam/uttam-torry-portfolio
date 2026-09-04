@@ -17,7 +17,7 @@ datastore, no user accounts.
 [ GitHub Pages CDN (Fastly) ]  ◄── artifact ── [ GitHub Actions: deploy-pages ]
                                                      ▲
                                                      │ push to master
-                                          [ Repo: sarva-uttam/PORTFOLIO ]
+                                          [ Repo: sarva-uttam/uttam-torry-portfolio ]
                                                      ▲
                                                      │ commits
                                           [ Owner's laptop + GitHub account ]

@@ -5,7 +5,7 @@
 This repository is the source for a **static personal portfolio website**
 (`index.html`, `faq.html`, `m.html`, `styles.css`, `script.js`, `route.js` and
 image/PDF assets) published with GitHub Pages at
-<https://sarva-uttam.github.io/PORTFOLIO/>.
+<https://sarva-uttam.github.io/uttam-torry-portfolio/>.
 
 There is **no backend, database, authentication, session, cookie, form
 submission, file upload or payment flow.** The site is HTML, CSS and
