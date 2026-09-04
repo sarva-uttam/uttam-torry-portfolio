@@ -62,9 +62,10 @@ Panel timing lives at the top of `script.js` (`HERO_OUT`, `WORK_IN/OUT`,
 
 ## Mobile build (`m.html`) + device routing
 
-A small blocking script in the `<head>` of `index.html` and `m.html` checks
-`pointer: coarse` / `hover: none` + screen size + user-agent. Phones are sent to
-`m.html`; everything else to `index.html`. A **"Mobile site" / "Desktop site"**
+`route.js` — a tiny same-origin script loaded synchronously in the `<head>` of
+`index.html` and `m.html` — checks `pointer: coarse` / `hover: none` + screen
+size + user-agent. Phones are sent to `m.html`; everything else to `index.html`.
+A **"Mobile site" / "Desktop site"**
 link in the footer (`data-view`) records an explicit choice in `localStorage`
 (`siteView`), and `?mobile=1` / `?desktop=1` force it. The hash is preserved
 across the redirect.
@@ -136,3 +137,23 @@ var RING_R = 452, RING_CARD = 146;   // ring geometry (centre: .rp__ring in CSS)
 hero does **not** reflow at any width — it is a cover-fit poster; phones get
 `m.html` instead. Only the nav (→ drawer ≤ 1080px) and footer (→ 2 / 1 columns)
 stay responsive.
+
+## Security
+
+This is a static site (no backend, DB, auth, forms, payments or AI), so the
+security surface is small. What's in place:
+
+- Strict `<meta>` **Content-Security-Policy** on every page (`script-src 'self'`,
+  no `unsafe-eval`; locked to self + Google Fonts). The `<head>` routing logic
+  lives in `route.js` so no inline script is needed.
+- `Referrer-Policy: strict-origin-when-cross-origin` + `rel="noopener noreferrer"`
+  on every external link.
+- Deploy workflow: `permissions: {}` at top, minimal job permissions,
+  `persist-credentials: false`, all `actions/*` pinned to commit SHAs, watched by
+  Dependabot (`.github/dependabot.yml`).
+- No secrets in the repo or its history; secret scanning + push protection on.
+
+Full audit, threat model, control matrix and residual-risk register:
+[`docs/security/`](docs/security/) and [`SECURITY.md`](SECURITY.md). Some
+controls (real `X-Content-Type-Options` / `Permissions-Policy` / frame-ancestors
+headers) need a header-capable host — see the control matrix.
