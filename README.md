@@ -1,154 +1,113 @@
-# Uttam Torry — Developer Portfolio
+# Uttam Torry — Portfolio
 
-[![Portfolio](https://img.shields.io/badge/View_live_portfolio-c7ff45?style=for-the-badge&logo=github&logoColor=111111)](https://sarva-uttam.github.io/uttam-torry-portfolio/)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Uttam_Torry-0A66C2?style=for-the-badge&logo=linkedin)](https://www.linkedin.com/in/uttam-torry-490702361/)
+A portfolio built around a scroll-scrubbed cinematic hero that plays the
+**full video (frames 1 → 300)**. Overlay panels cross-fade over the portrait as
+you scroll; the contact footer follows the last frame. A second page,
+`faq.html`, shares the nav, footer and assets.
 
-This repository contains my personal software-engineering portfolio. It is where I introduce myself, explain the kind of engineer I am becoming, and present the projects that best demonstrate how I think and build.
+## Run
 
-I am **Uttam Torry**, a Software Engineering graduate from Mauritius. I am looking for graduate and junior software-development opportunities locally and internationally, including roles that support relocation.
-
-> I build software that makes complex things easier to understand.
-
-## My story
-
-I completed a Bachelor of Software Engineering at the **National Research University of Electronic Technology (MIET)** in 2026. My path into engineering has been driven primarily by academic work, independent product development, and the decision to turn ambitious ideas into structured, testable systems.
-
-I am early in my professional career, and this portfolio does not try to hide that. Instead, it shows the qualities I can already demonstrate:
-
-- practical initiative;
-- careful requirements analysis;
-- clear technical documentation;
-- responsive interface development;
-- testing and disciplined GitHub workflows; and
-- the willingness to learn difficult systems step by step.
-
-My experience outside engineering—including hospitality, tutoring, and delivery work—also taught me how to communicate with different people, adapt quickly, and remain dependable in demanding environments. Those lessons influence how I approach software teams and users today.
-
-## What I am building
-
-### ISeeCode — Visual Interpreter
-
-My flagship academic project is a browser-based learning system that helps students understand what code is doing line by line.
-
-The central challenge was that beginner code is often incomplete, incorrect, or not ready to execute. I designed the product around two complementary paths:
-
-- **Run Mode** executes supported teaching programs and produces structured traces, variable updates, output, and runtime-aware explanations.
-- **Explain-only Mode** analyses unsupported or non-runnable input without pretending that execution occurred.
-
-This project developed my understanding of language processing, execution state, educational UX, and the importance of explaining system limitations honestly.
-
-- [Explore the repository](https://github.com/sarva-uttam/visual-interpreter)
-
-### Enveloped — Digital Invite
-
-A private digital-invitation platform in active development. It helps people create, personalise and share modern invitations for weddings and other celebrations.
-
-Verified work includes a guided survey, generated-invitation viewer, template gallery, device-scoped dashboard, Supabase persistence, RSVP handling and AI-assisted copy with a deterministic fallback.
-
-**Technology:** Next.js, TypeScript, Tailwind CSS, Supabase and the Vercel AI SDK.
-
-**Status:** Active private development. No public release is claimed.
-
-### Zordi Budget Tracker
-
-A private, non-partisan and specification-led civic-technology project. It is designed to track how Mauritius public-budget measures move from announcement to evidence-backed delivery.
-
-The work separates claims, sources, evidence, and assessments. It also models financial stages, lifecycle history, corrections, uncertainty, and auditability so that public information can be inspected rather than merely trusted.
-
-This project reflects my interest in software that makes complex public information clearer and more accountable.
-
-**Status:** Private specification and product-design work. No completed application or public launch is claimed.
-
-### Bwoo & Bloo's Books
-
-A private digital-product series of fillable PDF trackers, planners and journals designed to make practical everyday activities easier to organise.
-
-The work uses a shared visual system, reusable HTML/CSS layouts and a repeatable Playwright-to-PDF production workflow. Research notes and visual-quality checks are documented for each title.
-
-**Status:** Digital products in development. No public website or repository link is claimed.
-
-## How I approach engineering
-
-My working principle is:
-
-> **Show → explain → prove.**
-
-That means I try to:
-
-1. understand the user and the actual problem;
-2. define important constraints before implementation;
-3. make technical and product decisions explicit;
-4. build the smallest coherent solution;
-5. test important behaviour and failure cases; and
-6. document what exists, what is still in progress, and what is not yet proven.
-
-## Technical capabilities
-
-| Area | Technologies and practices |
-|---|---|
-| Languages | JavaScript, TypeScript, Python, C++, HTML5, CSS3 |
-| Web engineering | React, Next.js, Node.js, responsive interfaces, REST API fundamentals |
-| Data | PostgreSQL, SQL, Drizzle ORM, migration fundamentals |
-| Quality | Vitest, Playwright, debugging, CI quality gates |
-| Workflow | Git, GitHub, Docker fundamentals, technical documentation |
-
-**Spoken languages:** English, French, Hindi and Russian.
-
-I list technologies I can reasonably discuss and continue updating this section as my practical experience grows.
-
-## About this portfolio
-
-The portfolio itself is intentionally lightweight. It demonstrates that a professional experience does not always require a large framework or dependency tree.
-
-- Semantic HTML5
-- Responsive CSS with a focused dark-green visual system
-- Vanilla JavaScript
-- Keyboard-friendly navigation
-- Progressive enhancement
-- Automated GitHub Pages deployment
-
-## Run locally
-
-No build step is required.
+Needs a local server (the frames load via `Image`, so `file://` won't work):
 
 ```bash
-git clone https://github.com/sarva-uttam/uttam-torry-portfolio.git
-cd uttam-torry-portfolio
-npx serve .
+python -m http.server 8000
+# then open http://localhost:8000
 ```
 
-Then open the local address shown in the terminal.
+## Structure
 
-## Repository structure
+| File | Purpose |
+|------|---------|
+| `index.html` | Loader, shared nav, pinned hero with 4 overlay panels, shared footer, connect dialog |
+| `faq.html` | Standalone FAQ page — shares the nav, footer, `styles.css` and `script.js` |
+| `styles.css` | All styling + responsive rules (`.faq-*` block for the FAQ page) |
+| `script.js`  | Frame preloader, canvas renderer, scroll → frame mapping, panel cross-fade, `staggerReveal`, `updateRing`, reveal-on-scroll, `initNav` (mobile drawer), `initFaq` (accordion). Hero/canvas work is guarded by `HAS_HERO`, so `faq.html` loads the same file safely |
+| `assets/frames/` | 300 JPG frames (`ezgif-frame-001.jpg` … `ezgif-frame-300.jpg`) |
+| `assets/Uttam-Torry-CV-2026.pdf` | CV linked from the nav (both pages) and hero |
 
-```text
-.
-├── .github/workflows/       # GitHub Pages deployment
-├── assets/                  # Public résumé
-├── css/style.css            # Responsive visual system
-├── js/script.js             # Navigation and current-year behaviour
-├── index.html               # Portfolio content and structure
-└── README.md                # Repository story and documentation
+## How the scroll works
+
+`.hero` is `900vh` tall; `.hero__sticky` pins for that whole distance. Scroll
+progress `0 → 1` maps to frame **`1 → 300`**, drawn to a `<canvas>` (cover-fit),
+smoothed with a `requestAnimationFrame` lerp. The site starts on the first frame
+and ends on the last.
+
+Four overlay panels ride on top of the pinned canvas (edge-only gradient
+backgrounds so the portrait stays visible through the centre):
+
+| Frames    | Panel |
+|-----------|-------|
+| 1 – ~56   | **Hero** — headline, availability pill, right-hand fact rail; rises + fades out |
+| ~66 – 124 | **Selected work** — 4 project cards flanking the character, outlined numbers, mini-vizzes |
+| ~146 – 206| **About** — bio column left, oversized `CAREFUL ENGINEERING, / ROOM TO` *and* `GROW.` type right, spoken languages; elements rise-in / fade-out via `staggerReveal()` |
+| ~226 – 300| **Core capabilities** — 8 neon-white cards on a big circle around the character (`updateRing()`): still on approach → a ~270° revolve → freezes and holds. Cards ride the left/right arcs; the top/bottom of the circle run off-screen |
+| after     | pin releases → the **footer** scrolls up over the last frame |
+
+The **footer** (`#footer`): full-bleed (padding defines the side gutters, no
+inner max-width), compact height. HUD corner brackets, `LET'S CONNECT`, a
+"Start a conversation" button, a three-column block (brand + socials /
+navigation / contact), `40°/30°/20°` ticks and a decorative arc. Its pieces fade
+up on scroll via the `.reveal` + `IntersectionObserver` in `script.js`.
+
+The scrolled nav uses a soft top-anchored gradient (`.nav::before`) that fades to
+nothing — no hard "bar" edge. The portrait is nudged **down** in `drawFrame()`
+(`dy = (ch - dh) / 2 + dh * 0.05`) so his head isn't cropped at the top.
+
+## FAQ page
+
+`faq.html` (linked as **FAQs** in the nav — desktop and mobile — and in the
+footer). Editorial layout that matches the site: Anton headline
+`THE USEFUL ANSWERS, UP FRONT.`, a sticky topic navigator and four groups
+(Opportunities / Experience & skills / Projects / Working together) of native
+`<details>`/`<summary>` accordions — three questions each, twelve total.
+
+- Accessible by default: native disclosure semantics, keyboard operable, visible
+  `:focus-visible` outlines, a CSS plus/minus indicator, a subtle open animation
+  that `prefers-reduced-motion` disables.
+- `initFaq()` keeps one item open per group (opening a second closes the first);
+  cross-group items are independent.
+- `FAQPage` JSON-LD in the `<head>` mirrors the visible Q&A.
+- Ends with `Still curious? Let's connect.` — `Email me`
+  (`mailto:uttamtorry@gmail.com?subject=Software%20development%20opportunity`),
+  GitHub and LinkedIn.
+
+## Navigation & links
+
+- **Nav** (shared markup on both pages): brand → `index.html#top`; links
+  Home / About / Projects / Capabilities → `index.html#…`, FAQs → `faq.html`
+  (`aria-current="page"` on the current page), Download CV. Below 1080px the
+  links collapse into a slide-in drawer toggled by `#navToggle` (`initNav()` —
+  `aria-expanded`, `.nav.is-open`, closes on link click / Escape / outside click).
+- **Download CV** (nav + hero) → `assets/Uttam-Torry-CV-2026.pdf` with `download`
+  (see `assets/README.txt`).
+- **Scroll anchors** — invisible `.scroll-anchor` targets inside the pinned hero:
+  `#projects` 27% · `#about` 55% · `#capabilities` 82%. Footer links use the
+  `index.html#…` form so they also work from `faq.html`.
+- **Social icons** (hero + footer + connect dialog) → the real profiles
+  (`github.com/sarva-uttam`, `linkedin.com/in/uttam-torry-490702361`,
+  `facebook.com/share/1JbB2YLpCV`, `pinterest.com/sarva_uttam`,
+  `reddit.com/user/sarva-uttam`). Email everywhere is `mailto:`.
+
+## The "Start a conversation" chooser
+
+- **"Let's connect"** (hero) and **"Start a conversation"** (footer) are
+  `<button data-connect>` — they open `#connectModal`, a native `<dialog>`
+  (`initConnect()` in `script.js`) offering Email / LinkedIn / Facebook /
+  Pinterest / Reddit. Closes on the ✕, backdrop click, or Escape.
+
+## Tuning (top of `script.js`)
+
+```js
+var LAST_FRAME    = 300;
+var HERO_OUT      = [56, 74];      // hero overlay fades out over this frame range
+var WORK_IN/OUT   = [66,88] / [124,140];
+var ABOUT_IN/OUT  = [146,168] / [206,222];
+var RING_IN       = [226, 242];   // ring fades in, then holds to the end (no fade-out)
+var RING_ROT_WIN  = [0.12, 0.72]; // fraction of the ring's life where it revolves
+var RING_ROT      = [-248, 22.5]; // start / end angle of the revolve
 ```
 
-## Current direction
-
-I am currently focused on:
-
-- developing Enveloped, Zordi Budget Tracker and Bwoo & Bloo's Books;
-- strengthening full-stack engineering and software-architecture skills;
-- improving public documentation and demonstrations; and
-- preparing for graduate and junior engineering opportunities worldwide.
-
-## Contact
-
-If you are recruiting for a graduate or junior software role, working on an interesting product, or would like to discuss my projects:
-
-- [Portfolio](https://sarva-uttam.github.io/uttam-torry-portfolio/)
-- [LinkedIn](https://www.linkedin.com/in/uttam-torry-490702361/)
-- [GitHub](https://github.com/sarva-uttam)
-- [Email](mailto:uttamtorry@gmail.com)
-
----
-
-Project descriptions are kept honest and are updated as verifiable implementation milestones and public demonstrations become available.
+`.hero { height: 900vh }` in `styles.css` (plus the `820vh` / `740vh` overrides in
+the media queries) controls scroll-per-frame. Responsive: ≤ 1080px every panel
+becomes a single scrolling column / 2-col grid and the footer goes to 2 columns;
+≤ 720px everything stacks.

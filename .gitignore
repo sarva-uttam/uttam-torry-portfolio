@@ -1,0 +1,19 @@
+# source duplicate of assets/frames — not needed for the site
+Video frames/
+
+# local tooling
+.semgrep/
+.playwright-mcp/
+.vscode/
+
+# verification screenshots
+/faq-desktop.png
+/faq-tablet.png
+/faq-open.png
+/faq-mobile-nav.png
+/*.local.*
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini
