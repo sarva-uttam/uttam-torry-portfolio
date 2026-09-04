@@ -1088,7 +1088,17 @@ a { color: inherit; text-decoration: none; }
   width: 100%; height: 100%;
   object-fit: cover; object-position: 55% 18%;
   display: block;
+  transition: opacity .3s ease;
 }
+.m-hero__img.is-scrubbed { opacity: 0; }
+.m-hero__canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+.m-hero__canvas.is-ready { opacity: 1; }
 .m-hero__grad {
   position: absolute; inset: 0; pointer-events: none;
   background:

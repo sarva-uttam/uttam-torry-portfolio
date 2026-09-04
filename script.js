@@ -414,6 +414,115 @@
   }
 
   /* ============================================================
+     Mobile hero scrub (m.html only)
+     ------------------------------------------------------------
+     Same idea as the desktop stage — a scroll-position-driven frame
+     sequence — scaled down for the phone build: no pinned runway (the
+     canvas just scrubs across the frames as its own element crosses the
+     viewport, so page flow / scroll length is unchanged), and only a
+     subset of the 300 frames is fetched to keep the data cost sane.
+     ============================================================ */
+  function initMobileScrolly() {
+    var mCanvas = document.getElementById("mFrameCanvas");
+    var mMedia  = document.getElementById("mHeroMedia");
+    var mImg    = document.getElementById("mHeroImg");
+    if (!mCanvas || !mMedia) return;
+    var mCtx = mCanvas.getContext("2d", { alpha: false });
+    if (!mCtx) return;
+
+    /* sample ~50 frames evenly across the full 300-frame sequence —
+       reuses the existing assets/frames files, no separate export. */
+    var M = 50;
+    var mIndices = [];
+    for (var j = 0; j < M; j++) {
+      mIndices.push(Math.round(1 + (j * (FRAME_COUNT - 1)) / (M - 1)));
+    }
+
+    var mImages      = new Array(M);
+    var mLoadedFlags = new Array(M);
+    var mLoadedAny   = false;
+    var mTarget      = 0;
+    var mCurrent     = 0;
+    var mDpr         = Math.min(window.devicePixelRatio || 1, 2);
+    var POS_X = 0.55, POS_Y = 0.18; /* mirrors .m-hero__img object-position */
+    var RUNWAY = 620; /* px of scroll to sweep the full sequence — deliberate
+                          and device-independent, so it starts on frame 1 at
+                          rest instead of wherever the media box happens to
+                          sit relative to a given viewport height */
+
+    function mPreload() {
+      for (var i = 0; i < M; i++) {
+        (function (idx) {
+          var img = new Image();
+          img.onload = img.onerror = function () {
+            mLoadedFlags[idx] = true;
+            if (!mLoadedAny) {
+              mLoadedAny = true;
+              mCanvas.classList.add("is-ready");
+              if (mImg) mImg.classList.add("is-scrubbed");
+            }
+          };
+          img.src = FRAME_PATH(mIndices[idx]);
+          mImages[idx] = img;
+        })(i);
+      }
+    }
+
+    function mNearestLoaded(idx) {
+      if (mLoadedFlags[idx]) return mImages[idx];
+      for (var d = 1; d < M; d++) {
+        if (idx - d >= 0 && mLoadedFlags[idx - d]) return mImages[idx - d];
+        if (idx + d < M && mLoadedFlags[idx + d]) return mImages[idx + d];
+      }
+      return null;
+    }
+
+    function mResizeCanvas() {
+      var r = mMedia.getBoundingClientRect();
+      mCanvas.width  = Math.max(1, Math.round(r.width * mDpr));
+      mCanvas.height = Math.max(1, Math.round(r.height * mDpr));
+    }
+
+    function mDraw(frameFloat) {
+      var idx = Math.max(0, Math.min(M - 1, Math.round(frameFloat)));
+      var img = mNearestLoaded(idx);
+      if (!img || !img.naturalWidth) return;
+      var cw = mCanvas.width, ch = mCanvas.height;
+      var sw = img.naturalWidth, sh = img.naturalHeight;
+      /* replicate object-fit: cover + object-position for the source crop */
+      var scale = Math.max(cw / sw, ch / sh);
+      var cropW = cw / scale, cropH = ch / scale;
+      var sx = (sw - cropW) * POS_X, sy = (sh - cropH) * POS_Y;
+      mCtx.drawImage(img, sx, sy, cropW, cropH, 0, 0, cw, ch);
+    }
+
+    function mProgress() {
+      return clamp01(window.scrollY / RUNWAY);
+    }
+
+    function mUpdate() { mTarget = mProgress() * (M - 1); }
+
+    function mTick() {
+      mCurrent += (mTarget - mCurrent) * 0.2;
+      if (Math.abs(mTarget - mCurrent) < 0.05) mCurrent = mTarget;
+      if (mLoadedAny) mDraw(mCurrent);
+      requestAnimationFrame(mTick);
+    }
+
+    mResizeCanvas();
+    mUpdate();
+    window.addEventListener("scroll", mUpdate, { passive: true });
+    window.addEventListener("resize", function () {
+      mDpr = Math.min(window.devicePixelRatio || 1, 2);
+      mResizeCanvas();
+      mUpdate();
+    });
+
+    mPreload();
+    requestAnimationFrame(mTick);
+  }
+
+  /* ============================================================
      Boot
      ============================================================ */
   function onScroll() { updateFromScroll(); onScrollNav(); }
@@ -424,6 +533,7 @@
   initConnect();
   initFaq();
   initViewSwitch();
+  initMobileScrolly();
 
   if (HAS_HERO) {
     setStageScale();
