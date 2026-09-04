@@ -1,16 +1,35 @@
-# source duplicate of assets/frames — not needed for the site
+# source duplicates of assets/frames — not needed for the site
 Video frames/
+HD frames/
 
-# local tooling
+# local tooling (may contain machine-local auth tokens — never commit)
 .semgrep/
+.claude/
 .playwright-mcp/
 .vscode/
+.idea/
+
+# secrets / credentials — must never be committed
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa*
+*.credentials
+secrets.*
+*.local.*
 
 # verification screenshots (root-level only; assets/ pngs are kept)
 /*.png
-/*.local.*
 
 # OS junk
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# never commit a copy of the repo itself
+.git.zip
+*.bundle
